@@ -1,0 +1,21 @@
+services:
+  devcontainer:
+    image: terraria-meshi-team-devcontainer
+    container_name: terraria-meshi-team-devcontainer
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    # Change the init command so that the container doesn't exit
+    entrypoint: /usr/local/share/docker-init.sh
+    command: sleep infinity
+    volumes:
+      # Mount the Docker daemon socket so the devcontainer can run Docker commands
+      - /var/run/docker.sock:/var/run/docker-host.sock
+      # Mount the project directory as the working directory
+      - ${LOCAL_WORKSPACE_FOLDER:-.}:${CONTAINER_WORKSPACE_FOLDER:-/workspaces/terraria-meshi-team}:cached
+      # Mount a volume for node_modules
+      - devcontainer-node_modules:${CONTAINER_WORKSPACE_FOLDER:-/workspaces/terraria-meshi-team}/node_modules
+
+volumes:
+  devcontainer-node_modules:
+    name: terraria-meshi-team-devcontainer-node_modules

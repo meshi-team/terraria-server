@@ -1,0 +1,305 @@
+// Dev Container configuration file.
+// https://aka.ms/devcontainer.json
+{
+  "name": "terraria-meshi-team",
+
+  // Run with Docker Compose.
+  // https://code.visualstudio.com/docs/devcontainers/create-dev-container#_use-docker-compose
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "devcontainer",
+  "workspaceFolder": "/workspaces/terraria-meshi-team",
+
+  // Environment variables for VSCode.
+  // https://code.visualstudio.com/remote/advancedcontainers/environment-variables
+  "remoteEnv": {
+    // To mount the local workspace folder in the container.
+    "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
+    "CONTAINER_WORKSPACE_FOLDER": "${containerWorkspaceFolder}"
+  },
+
+  // Features to install in the container.
+  // https://containers.dev/features
+  "features": {
+    // Docker
+    // https://github.com/devcontainers/features/tree/main/src/docker-outside-of-docker
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "version": "latest",
+      "moby": true,
+      "installDockerBuildx": true,
+      "mobyBuildxVersion": "latest",
+      "dockerDashComposeVersion": "v2"
+    },
+
+    // Node.js LTS
+    // https://github.com/devcontainers/features/tree/main/src/node
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts",
+      "nvmVersion": "latest"
+    },
+
+    // yamllint
+    // https://github.com/devcontainers-contrib/features/tree/main/src/yamllint
+    "ghcr.io/devcontainers-contrib/features/yamllint:2": {
+      "version": "latest"
+    },
+
+    // shfmt
+    // https://github.com/devcontainers-contrib/features/tree/main/src/shfmt
+    "ghcr.io/devcontainers-contrib/features/shfmt:1.0.0": {
+      "version": "latest"
+    },
+
+    // hadolint
+    // https://github.com/dhoeric/features/tree/main/src/hadolint
+    "ghcr.io/dhoeric/features/hadolint:1": {
+      "version": "latest"
+    }
+  },
+
+  // Run commands after the container is started (on each start-up).
+  "postStartCommand": {
+    // Install Node.js dependencies.
+    "npm install": "/bin/bash -c 'npm install'"
+  },
+
+  // Disable auto-forwarding ports.
+  "otherPortsAttributes": { "onAutoForward": "ignore" },
+
+  // Tool-specific settings.
+  "customizations": {
+    // VSCode
+    "vscode": {
+      "extensions": [
+        ////////////////////////////////////////////////////////////////////////
+        // Language support
+        ////////////////////////////////////////////////////////////////////////
+        // Dockerfile
+        // - Language support
+        "ms-azuretools.vscode-docker",
+        // - Linting
+        "exiasr.hadolint",
+
+        // JSON
+        // - Linting (eslint-plugin-json)
+        "dbaeumer.vscode-eslint",
+
+        // Markdown
+        // - GitHub-flavored Markdown
+        "yzhang.markdown-all-in-one",
+        // - Linting
+        "DavidAnson.vscode-markdownlint",
+
+        // YAML
+        // - Linting (yamllint)
+        "fnando.linter",
+
+        // GitHub Actions
+        // - Syntax highlighting and validation for GitHub Actions workflows
+        "GitHub.vscode-github-actions",
+
+        // Dotenv
+        // - Language support
+        "mikestead.dotenv",
+
+        // Prettier
+        // - Formatting
+        "esbenp.prettier-vscode",
+
+        // shfmt
+        // - Formatting
+        "foxundermoon.shell-format",
+
+        ////////////////////////////////////////////////////////////////////////
+        // Tools
+        ////////////////////////////////////////////////////////////////////////
+        // Git
+        // - Git Lens
+        "eamodio.gitlens",
+
+        // QoL
+        // - GitHub Copilot
+        "GitHub.copilot",
+        // - Colorize indentation levels
+        "oderwat.indent-rainbow",
+
+        // Editor
+        // - .editorconfig support
+        "EditorConfig.EditorConfig"
+      ],
+      "settings": {
+        ////////////////////////////////////////////////////////////////////////
+        // General editor settings
+        ////////////////////////////////////////////////////////////////////////
+        // Remote
+        // - Disable auto-forwarding ports
+        "remote.autoForwardPorts": false,
+
+        // Files
+        // - End of line as \n
+        "files.eol": "\n",
+        // - Associations
+        "files.associations": {
+          ".env": "dotenv",
+          ".env.example": "dotenv"
+        },
+
+        // Formatting
+        // - Run fix actions on save
+        "editor.codeActionsOnSave": {
+          "source.fixAll": "explicit",
+          "source.fixAll.eslint": "explicit",
+          "source.fixAll.markdownlint": "explicit"
+        },
+
+        // Bracket and indentation colors
+        // - Brackets
+        "editor.bracketPairColorization.enabled": true,
+        "workbench.colorCustomizations": {
+          "editorBracketHighlight.foreground1": "#d6bb33",
+          "editorBracketHighlight.foreground2": "#ff69b4",
+          "editorBracketHighlight.foreground3": "#2ac8d6",
+          "editorBracketHighlight.foreground4": "#ff8c00",
+          "editorBracketHighlight.foreground5": "#4b58eb",
+          "editorBracketHighlight.foreground6": "#4dc689"
+        },
+        // - Indentation
+        "indentRainbow.colors": [
+          "#d6bb3314",
+          "#ff69b414",
+          "#2ac8d614",
+          "#ff8c0014",
+          "#4b58eb14",
+          "#4dc68914"
+        ],
+
+        ////////////////////////////////////////////////////////////////////////
+        // Others
+        ////////////////////////////////////////////////////////////////////////
+        // Prettier
+        // - Format on save
+        "[javascript][json][jsonc][markdown][yaml][dockercompose][github-actions-workflow]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.formatOnSave": true
+        },
+        // - Configuration location
+        "prettier.configPath": "${containerWorkspaceFolder}/.config/.prettierrc.yml",
+        // - Ignore configuration location
+        "prettier.ignorePath": "${containerWorkspaceFolder}/.config/.prettierignore",
+
+        // ESLint
+        // - Enable for JavaScript, JSON, and JSONC
+        "eslint.validate": ["javascript", "json", "jsonc"],
+        // - Configuration location
+        "eslint.options": {
+          "overrideConfigFile": "${containerWorkspaceFolder}/.config/.eslint.config.mjs"
+        },
+
+        // Markdown
+        // - Table of contents: start at heading level 2
+        "markdown.extension.toc.levels": "2..6",
+        // - Table of contents: don't include headings
+        "markdown.extension.toc.omittedFromToc": {
+          "README.md": ["## Table of contents", "## Tabla de contenidos"]
+        },
+
+        // shfmt
+        // - Format on save
+        "[dockerfile][shellscript]": {
+          "editor.defaultFormatter": "foxundermoon.shell-format",
+          "editor.formatOnSave": true
+        },
+        // - Use installed shfmt
+        "shellformat.path": "/usr/local/bin/shfmt",
+        "shellformat.useEditorConfig": true,
+
+        // Hadolint
+        // - Use installed hadolint
+        "hadolint.hadolintPath": "/usr/local/bin/hadolint",
+        // - Configuration location
+        // "hadolint.cliOptions": [
+        //   "--config ${containerWorkspaceFolder}/.config/.hadolint.yml"
+        // ],
+
+        // yamllint
+        // - Use installed yamllint
+        "linter.linters": {
+          "brakeman": {
+            "enabled": false
+          },
+          "cargo-clippy": {
+            "enabled": false
+          },
+          "credo": {
+            "enabled": false
+          },
+          "dart": {
+            "enabled": false
+          },
+          "erb_lint": {
+            "enabled": false
+          },
+          "eslint": {
+            "enabled": false
+          },
+          "gherkin-lint": {
+            "enabled": false
+          },
+          "hadolint": {
+            "enabled": false
+          },
+          "language-tool": {
+            "enabled": false
+          },
+          "luacheck": {
+            "enabled": false
+          },
+          "markdownlint": {
+            "enabled": false
+          },
+          "php-code-sniffer": {
+            "enabled": false
+          },
+          "proselint": {
+            "enabled": false
+          },
+          "pylint": {
+            "enabled": false
+          },
+          "reek": {
+            "enabled": false
+          },
+          "rubocop": {
+            "enabled": false
+          },
+          "ruby": {
+            "enabled": false
+          },
+          "shellcheck": {
+            "enabled": false
+          },
+          "sqlfluff": {
+            "enabled": false
+          },
+          "stylelint": {
+            "enabled": false
+          },
+          "swiftlint": {
+            "enabled": false
+          },
+          "textlint": {
+            "enabled": false
+          },
+          "vale": {
+            "enabled": false
+          },
+          "yamllint": {
+            "enabled": true,
+            "languages": ["yaml", "dockercompose", "github-actions-workflow"],
+            // - Configuration location
+            "configFiles": ["${containerWorkspaceFolder}/.config/.yamllint.yml"]
+          }
+        }
+      }
+    }
+  }
+}
