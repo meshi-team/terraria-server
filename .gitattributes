@@ -1,0 +1,6 @@
+# Normalizes LF line ending in text files
+* text=auto eol=lf
+
+# These .json files are JSONC (json with comments)
+.devcontainer/*.json linguist-language=jsonc
+.vscode/*.json linguist-language=jsonc

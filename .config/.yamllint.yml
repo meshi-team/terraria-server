@@ -1,0 +1,28 @@
+# yamllint configuration file.
+# https://yamllint.readthedocs.io/en/stable/
+
+# Extend the default configuration.
+extends: default
+
+# Lint rules.
+rules:
+  line-length:
+    max: 120
+    allow-non-breakable-words: true
+    allow-non-breakable-inline-mappings: true
+  comments:
+    min-spaces-from-content: 1
+  document-start:
+    present: false
+  quoted-strings:
+    required: only-when-needed
+    extra-allowed: ["{|}"]
+  octal-values:
+    forbid-implicit-octal: true
+  truthy:
+    check-keys: false
+  key-duplicates: {}
+
+# Ignored paths.
+ignore:
+  - node_modules/

@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: devcontainers
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "12:00" # 12:00 UTC (07:00 COL)
+    target-branch: main
+    labels:
+      - bot
+      - chore
+      - skip-changelog
+    commit-message:
+      prefix: chore(deps-devcontainers)

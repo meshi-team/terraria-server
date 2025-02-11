@@ -1,0 +1,14 @@
+{
+  "name": "soruba-master",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "lint-fix": "eslint --fix .",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "eslint": "^9.20.0",
+    "eslint-plugin-json": "^4.0.1",
+    "prettier": "^3.5.0"
+  }
+}
