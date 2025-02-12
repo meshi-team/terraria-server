@@ -12,7 +12,7 @@ services:
       # Mount the Docker daemon socket so the devcontainer can run Docker commands
       - /var/run/docker.sock:/var/run/docker-host.sock
       # Mount the project directory as the working directory
-      - ${LOCAL_WORKSPACE_FOLDER:-.}:${CONTAINER_WORKSPACE_FOLDER:-/workspaces/terraria-meshi-team}:cached
+      - ${LOCAL_WORKSPACE_FOLDER:-.}:${CONTAINER_WORKSPACE_FOLDER:-/workspaces/terraria-meshi-team}
       # Mount a volume for node_modules
       - devcontainer-node_modules:${CONTAINER_WORKSPACE_FOLDER:-/workspaces/terraria-meshi-team}/node_modules
 

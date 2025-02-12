@@ -37,6 +37,14 @@
       "nvmVersion": "latest"
     },
 
+    // Terraform
+    // https://github.com/devcontainers/features/tree/main/src/terraform
+    "ghcr.io/devcontainers/features/terraform:1": {
+      "version": "latest",
+      "tflint": "latest",
+      "terragrunt": "none"
+    },
+
     // yamllint
     // https://github.com/devcontainers-contrib/features/tree/main/src/yamllint
     "ghcr.io/devcontainers-contrib/features/yamllint:2": {
@@ -78,6 +86,11 @@
         "ms-azuretools.vscode-docker",
         // - Linting
         "exiasr.hadolint",
+
+        // Terraform
+        // - Language support
+        "hashicorp.terraform",
+        "hashicorp.hcl",
 
         // JSON
         // - Linting (eslint-plugin-json)
@@ -124,7 +137,13 @@
 
         // Editor
         // - .editorconfig support
-        "EditorConfig.EditorConfig"
+        "EditorConfig.EditorConfig",
+
+        ////////////////////////////////////////////////////////////////////////
+        // Excluded extensions
+        ////////////////////////////////////////////////////////////////////////
+        // - Azure Terraform
+        "-ms-azuretools.vscode-azureterraform"
       ],
       "settings": {
         ////////////////////////////////////////////////////////////////////////
@@ -173,8 +192,15 @@
         ],
 
         ////////////////////////////////////////////////////////////////////////
-        // Others
+        // Per tool settings
         ////////////////////////////////////////////////////////////////////////
+        // Terraform
+        // - Format on save
+        "[terraform]": {
+          "editor.defaultFormatter": "hashicorp.terraform",
+          "editor.formatOnSave": true
+        },
+
         // Prettier
         // - Format on save
         "[javascript][json][jsonc][markdown][yaml][dockercompose][github-actions-workflow]": {
