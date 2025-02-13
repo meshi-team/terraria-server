@@ -1,5 +1,5 @@
-variable "domain_name" {
-  description = "Name of the domain"
+variable "zone_id" {
+  description = "ID of the domain to create the record in"
   type        = string
   sensitive   = true
 }
@@ -23,7 +23,7 @@ variable "is_proxied" {
 }
 
 variable "ttl" {
-  description = "TTL of the record"
+  description = "TTL of the record (if not proxied)"
   type        = number
   default     = 3600
 }

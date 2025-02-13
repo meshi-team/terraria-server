@@ -20,13 +20,13 @@ variable "name_suffix" {
 variable "vcn_cidr_block" {
   description = "CIDR block for the VCN"
   type        = string
-  default     = "0.0.0.0/16"
+  default     = "10.0.0.0/16"
 }
 
 variable "subnet_cidr_block" {
   description = "CIDR block for the subnet"
   type        = string
-  default     = "0.0.0.0/24"
+  default     = "10.0.0.0/24"
 }
 
 variable "server_port" {

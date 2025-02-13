@@ -10,16 +10,18 @@ module "compute" {
   source = "./modules/compute"
 
   compartment_id = var.oci_compartment_id
-  name_suffix    = var.oci_resources_name_suffix
-  ocpus          = var.server_instance_ocpus
-  memory_in_gbs  = var.server_instance_memory_in_gbs
   subnet_id      = module.network.subnet_id
+
+  name_suffix    = var.oci_resources_name_suffix
+  ocpus          = var.server_ocpus
+  memory_in_gbs  = var.server_memory_in_gbs
+  ssh_public_key = var.server_ssh_public_key
 }
 
 module "dns" {
   source = "./modules/dns"
 
-  domain_name = var.cloudfare_domain
-  subdomain   = var.server_subdomain
-  target      = module.compute.public_ip
+  zone_id   = var.cloudfare_zone_id
+  subdomain = var.server_subdomain
+  target    = module.compute.public_ip
 }

@@ -1,8 +1,8 @@
 resource "oci_core_vcn" "vcn" {
   compartment_id = var.compartment_id
 
-  display_name   = local.vcn_name
-  dns_label      = local.vcn_name
+  display_name = local.vcn_name
+  # dns_label      = var.name_suffix
   cidr_blocks    = [var.vcn_cidr_block]
   is_ipv6enabled = false
 }
@@ -11,8 +11,8 @@ resource "oci_core_subnet" "subnet" {
   compartment_id = var.compartment_id
   vcn_id         = oci_core_vcn.vcn.id
 
-  display_name               = local.subnet_name
-  dns_label                  = local.subnet_name
+  display_name = local.subnet_name
+  # dns_label                  = var.name_suffix
   cidr_block                 = var.subnet_cidr_block
   prohibit_public_ip_on_vnic = false # Public subnet
 

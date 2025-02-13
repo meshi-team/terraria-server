@@ -16,14 +16,14 @@ variable "oci_user_id" {
   sensitive   = true
 }
 
-variable "oci_private_key" {
-  description = "OCI private key"
+variable "oci_api_fingerprint" {
+  description = "OCI API fingerprint"
   type        = string
   sensitive   = true
 }
 
-variable "oci_key_fingerprint" {
-  description = "OCI fingerprint"
+variable "oci_api_private_key" {
+  description = "OCI API private key"
   type        = string
   sensitive   = true
 }
@@ -46,8 +46,8 @@ variable "cloudflare_api_token" {
   sensitive   = true
 }
 
-variable "cloudfare_domain" {
-  description = "Domain name hosted in Cloudflare"
+variable "cloudfare_zone_id" {
+  description = "ID of the domain on Cloudflare"
   type        = string
   sensitive   = true
 }
@@ -64,12 +64,18 @@ variable "server_port" {
   sensitive   = true
 }
 
-variable "server_instance_ocpus" {
+variable "server_ocpus" {
   description = "Number of OCPUs for the server instance"
   type        = number
 }
 
-variable "server_instance_memory_in_gbs" {
+variable "server_memory_in_gbs" {
   description = "Memory in GBs for the server instance"
   type        = number
+}
+
+variable "server_ssh_public_key" {
+  description = "SSH public key for the server instance"
+  type        = string
+  sensitive   = true
 }
