@@ -46,7 +46,7 @@ variable "cloudflare_api_token" {
   sensitive   = true
 }
 
-variable "cloudfare_zone_id" {
+variable "cloudflare_zone_id" {
   description = "ID of the domain on Cloudflare"
   type        = string
   sensitive   = true

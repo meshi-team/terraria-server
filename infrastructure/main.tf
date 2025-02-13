@@ -21,7 +21,7 @@ module "compute" {
 module "dns" {
   source = "./modules/dns"
 
-  zone_id   = var.cloudfare_zone_id
+  zone_id   = var.cloudflare_zone_id
   subdomain = var.server_subdomain
   target    = module.compute.public_ip
 }
