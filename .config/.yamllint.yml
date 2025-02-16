@@ -7,6 +7,7 @@ extends: default
 # Lint rules.
 rules:
   line-length:
+    level: warning
     max: 120
     allow-non-breakable-words: true
     allow-non-breakable-inline-mappings: true
