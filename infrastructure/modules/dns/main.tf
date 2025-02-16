@@ -1,5 +1,5 @@
 resource "cloudflare_dns_record" "dns_record" {
-  zone_id = var.zone_id
+  zone_id = data.cloudflare_zone.zone.id
 
   type    = "A"
   name    = var.subdomain

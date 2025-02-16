@@ -1,5 +1,5 @@
-variable "zone_id" {
-  description = "ID of the domain to create the record in"
+variable "domain" {
+  description = "Domain to create the record for"
   type        = string
 }
 

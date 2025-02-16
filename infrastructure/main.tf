@@ -29,7 +29,7 @@ module "public_ip" {
 module "dns" {
   source = "./modules/dns"
 
-  zone_id   = var.cloudflare_zone_id
+  domain    = var.cloudflare_domain
   subdomain = var.server_subdomain
   target    = module.public_ip.public_ip
 }
