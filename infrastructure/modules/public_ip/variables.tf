@@ -3,6 +3,11 @@ variable "compartment_id" {
   type        = string
 }
 
+variable "name_suffix" {
+  description = "Suffix to append to the resources names"
+  type        = string
+}
+
 variable "subnet_id" {
   description = "The OCID of the subnet where the private IP is located"
   type        = string
