@@ -12,6 +12,7 @@ rules:
     allow-non-breakable-inline-mappings: true
   comments:
     min-spaces-from-content: 1
+    require-starting-space: false
   document-start:
     present: false
   quoted-strings:
