@@ -16,14 +16,8 @@ variable "target" {
   sensitive   = true
 }
 
-variable "is_proxied" {
-  description = "Whether the record is proxied by Cloudflare"
-  type        = bool
-  default     = true
-}
-
 variable "ttl" {
-  description = "TTL of the record (if not proxied)"
+  description = "TTL of the record"
   type        = number
   default     = 3600
 }

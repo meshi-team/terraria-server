@@ -4,6 +4,6 @@ resource "cloudflare_dns_record" "dns_record" {
   type    = "A"
   name    = var.subdomain
   content = var.target
-  proxied = var.is_proxied
+  proxied = false
   ttl     = local.ttl
 }
