@@ -5,5 +5,5 @@ resource "cloudflare_dns_record" "dns_record" {
   name    = var.subdomain
   content = var.target
   proxied = false
-  ttl     = local.ttl
+  ttl     = var.ttl
 }
