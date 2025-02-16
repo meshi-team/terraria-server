@@ -7,19 +7,16 @@ variable "oci_region" {
 variable "oci_tenancy_id" {
   description = "OCI tenancy OCID"
   type        = string
-  sensitive   = true
 }
 
 variable "oci_user_id" {
   description = "OCI user OCID"
   type        = string
-  sensitive   = true
 }
 
 variable "oci_api_fingerprint" {
   description = "OCI API fingerprint"
   type        = string
-  sensitive   = true
 }
 
 variable "oci_api_private_key" {
@@ -31,7 +28,6 @@ variable "oci_api_private_key" {
 variable "oci_compartment_id" {
   description = "OCI compartment OCID"
   type        = string
-  sensitive   = true
 }
 
 variable "oci_resources_name_suffix" {
@@ -49,19 +45,16 @@ variable "cloudflare_api_token" {
 variable "cloudflare_zone_id" {
   description = "ID of the domain on Cloudflare"
   type        = string
-  sensitive   = true
 }
 
 variable "server_subdomain" {
   description = "Subdomain for the server"
   type        = string
-  sensitive   = true
 }
 
 variable "server_port" {
   description = "Port for the server"
   type        = number
-  sensitive   = true
 }
 
 variable "server_ocpus" {
@@ -77,5 +70,4 @@ variable "server_memory_in_gbs" {
 variable "server_ssh_public_key" {
   description = "SSH public key for the server instance"
   type        = string
-  sensitive   = true
 }
