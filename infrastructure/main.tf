@@ -18,10 +18,18 @@ module "compute" {
   ssh_public_key = var.server_ssh_public_key
 }
 
+module "public_ip" {
+  source = "./modules/public_ip"
+
+  compartment_id = var.oci_compartment_id
+  subnet_id      = module.network.subnet_id
+  private_ip     = module.compute.private_ip
+}
+
 module "dns" {
   source = "./modules/dns"
 
   zone_id   = var.cloudflare_zone_id
   subdomain = var.server_subdomain
-  target    = module.compute.public_ip
+  target    = module.public_ip.public_ip
 }
