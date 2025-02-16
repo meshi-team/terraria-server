@@ -1,13 +1,11 @@
 variable "compartment_id" {
   description = "OCID of the compartment in which to create the resources"
   type        = string
-  sensitive   = true
 }
 
 variable "subnet_id" {
   description = "OCID of the subnet in which to create the instance"
   type        = string
-  sensitive   = true
 }
 
 variable "name_suffix" {
@@ -69,5 +67,4 @@ variable "boot_volume_size_in_gbs" {
 variable "ssh_public_key" {
   description = "SSH public key allowed to connect to the instance"
   type        = string
-  sensitive   = true
 }

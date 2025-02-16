@@ -24,9 +24,10 @@ resource "oci_core_instance" "instance" {
   create_vnic_details {
     subnet_id = var.subnet_id
 
-    assign_public_ip          = true
+    assign_public_ip          = false
     assign_ipv6ip             = false
     assign_private_dns_record = false
+    skip_source_dest_check    = true
   }
 
   availability_config {

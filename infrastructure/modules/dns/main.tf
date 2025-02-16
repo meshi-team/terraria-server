@@ -1,9 +1,9 @@
 resource "cloudflare_dns_record" "dns_record" {
-  zone_id = var.zone_id
+  zone_id = data.cloudflare_zones.zone.result.0.id
 
   type    = "A"
   name    = var.subdomain
   content = var.target
-  proxied = var.is_proxied
-  ttl     = local.ttl
+  proxied = false
+  ttl     = var.ttl
 }

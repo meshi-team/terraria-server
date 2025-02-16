@@ -1,7 +1,6 @@
 variable "compartment_id" {
   description = "OCID of the compartment in which to create the resources"
   type        = string
-  sensitive   = true
 }
 
 variable "name_suffix" {
@@ -32,7 +31,6 @@ variable "subnet_cidr_block" {
 variable "server_port" {
   description = "Server port to allow TCP/UDP traffic to"
   type        = number
-  sensitive   = true
 
   validation {
     condition     = var.server_port > 0 && var.server_port < 65536
