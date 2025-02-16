@@ -22,8 +22,10 @@ module "public_ip" {
   source = "./modules/public_ip"
 
   compartment_id = var.oci_compartment_id
-  subnet_id      = module.network.subnet_id
-  private_ip     = module.compute.private_ip
+  name_suffix    = var.oci_resources_name_suffix
+
+  subnet_id  = module.network.subnet_id
+  private_ip = module.compute.private_ip
 }
 
 module "dns" {
