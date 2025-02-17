@@ -1,5 +1,10 @@
 variable "compartment_id" {
-  description = "OCID of the compartment in which to create the resources"
+  description = "OCID of the compartment in which to create the instance"
+  type        = string
+}
+
+variable "ad_name" {
+  description = "Availability Domain name in which to create the instance"
   type        = string
 }
 
@@ -11,31 +16,11 @@ variable "subnet_id" {
 variable "name_suffix" {
   description = "Suffix to append to the resources names"
   type        = string
-
-  validation {
-    condition = can(regex("^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$", var.name_suffix))
-    error_message = join(" ", [
-      "Name suffix must only contain alphanumeric characters,",
-      "optionally separated by hyphens"
-    ])
-  }
-}
-
-variable "ad_number" {
-  description = "Availability Domain number"
-  type        = number
-  default     = 1
-
-  validation {
-    condition     = var.ad_number > 0 && var.ad_number <= 3
-    error_message = "Availability Domain number must be between 1 and 3"
-  }
 }
 
 variable "source_image_id" {
   description = "OCID of the source OS image for the instance"
   type        = string
-  default     = "ocid1.image.oc1.iad.aaaaaaaarv24gpcgg66ccfdh6posr5rrfhm2is26sr7523omdi6ebjenzo2a"
 }
 
 variable "ocpus" {
@@ -62,6 +47,11 @@ variable "boot_volume_size_in_gbs" {
   description = "Size of the boot volume in GBs"
   type        = number
   default     = 50
+
+  validation {
+    condition     = var.boot_volume_size_in_gbs >= 50 && var.boot_volume_size_in_gbs <= 200
+    error_message = "Size of the boot volume must be between 50 and 200 GBs"
+  }
 }
 
 variable "ssh_public_key" {
