@@ -15,14 +15,3 @@ resource "oci_core_volume" "volume" {
     }
   }
 }
-
-resource "oci_core_volume_attachment" "volume_attachment" {
-  attachment_type = "paravirtualized"
-  instance_id     = var.instance_id
-  volume_id       = oci_core_volume.volume.id
-
-  display_name                        = local.volume_attachment_name
-  is_pv_encryption_in_transit_enabled = true
-  is_read_only                        = false
-  is_shareable                        = false
-}

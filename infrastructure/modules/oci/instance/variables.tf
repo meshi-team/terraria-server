@@ -58,3 +58,8 @@ variable "ssh_public_key" {
   description = "SSH public key allowed to connect to the instance"
   type        = string
 }
+
+variable "attached_volume_id" {
+  description = "OCID of the block volume to attach to the instance"
+  type        = string
+}
