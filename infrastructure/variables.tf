@@ -30,12 +30,6 @@ variable "oci_compartment_id" {
   type        = string
 }
 
-variable "oci_resources_name_suffix" {
-  description = "Name suffix for the created OCI resources"
-  type        = string
-  default     = "terraria-server"
-}
-
 variable "cloudflare_api_token" {
   description = "Cloudflare API token"
   type        = string
@@ -47,27 +41,28 @@ variable "cloudflare_domain" {
   type        = string
 }
 
-variable "server_subdomain" {
-  description = "Subdomain for the server"
+variable "github_organization" {
+  description = "GitHub organization name"
   type        = string
 }
 
-variable "server_port" {
-  description = "Port for the server"
+variable "github_app_id" {
+  description = "GitHub App ID"
   type        = number
 }
 
-variable "server_ocpus" {
-  description = "Number of OCPUs for the server instance"
+variable "github_app_installation_id" {
+  description = "GitHub App installation ID"
   type        = number
 }
 
-variable "server_memory_in_gbs" {
-  description = "Memory in GBs for the server instance"
-  type        = number
+variable "github_app_private_key" {
+  description = "GitHub App private key"
+  type        = string
+  sensitive   = true
 }
 
-variable "server_ssh_public_key" {
-  description = "SSH public key for the server instance"
+variable "github_repository" {
+  description = "GitHub repository name"
   type        = string
 }
