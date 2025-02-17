@@ -8,7 +8,7 @@ resource "oci_core_volume" "volume" {
   vpus_per_gb = 10
 
   dynamic "source_details" {
-    for_each = var.backup_id != null ? [1] : []
+    for_each = var.backup_id != "" ? [1] : []
     content {
       type = "volumeBackup"
       id   = var.backup_id

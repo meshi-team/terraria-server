@@ -40,6 +40,16 @@ module "instance" {
   ssh_public_key  = module.github_env_read.variables["SERVER_SSH_PUBLIC_KEY"]
 }
 
+module "volume" {
+  source = "./modules/oci/volume"
+
+  compartment_id = module.compartment.id
+  name_suffix    = var.github_repository
+
+  ad_name     = module.ad
+  instance_id = module.instance.id
+}
+
 module "public_ip" {
   source = "./modules/oci/public_ip"
 

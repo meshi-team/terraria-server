@@ -48,6 +48,11 @@ variable "boot_volume_size_in_gbs" {
   description = "Size of the boot volume in GBs"
   type        = number
   default     = 50
+
+  validation {
+    condition     = var.boot_volume_size_in_gbs > 50 && var.boot_volume_size_in_gbs <= 200
+    error_message = "Size of the boot volume must be between 50 and 200 GBs"
+  }
 }
 
 variable "ssh_public_key" {
