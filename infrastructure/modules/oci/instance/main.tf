@@ -30,6 +30,16 @@ resource "oci_core_instance" "instance" {
     skip_source_dest_check    = true
   }
 
+  launch_volume_attachments {
+    type      = "paravirtualized"
+    volume_id = var.attached_volume_id
+
+    display_name                        = local.volume_attachment_name
+    is_pv_encryption_in_transit_enabled = true
+    is_read_only                        = false
+    is_shareable                        = true
+  }
+
   availability_config {
     is_live_migration_preferred = true
     recovery_action             = "RESTORE_INSTANCE"
