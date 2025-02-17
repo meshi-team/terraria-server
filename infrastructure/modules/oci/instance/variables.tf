@@ -22,7 +22,6 @@ variable "name_suffix" {
 variable "source_image_id" {
   description = "OCID of the source OS image for the instance"
   type        = string
-  default     = "ocid1.image.oc1.iad.aaaaaaaarv24gpcgg66ccfdh6posr5rrfhm2is26sr7523omdi6ebjenzo2a"
 }
 
 variable "ocpus" {

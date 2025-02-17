@@ -32,11 +32,12 @@ module "instance" {
   compartment_id = module.compartment.id
   name_suffix    = var.github_repository
 
-  ad_name        = module.ad.name
-  subnet_id      = module.network.subnet_id
-  ocpus          = module.github_env_read.variables["SERVER_OCPUS"]
-  memory_in_gbs  = module.github_env_read.variables["SERVER_MEMORY_IN_GBS"]
-  ssh_public_key = module.github_env_read.variables["SERVER_SSH_PUBLIC_KEY"]
+  ad_name         = module.ad.name
+  subnet_id       = module.network.subnet_id
+  ocpus           = module.github_env_read.variables["SERVER_OCPUS"]
+  memory_in_gbs   = module.github_env_read.variables["SERVER_MEMORY_IN_GBS"]
+  source_image_id = module.github_env_read.variables["SERVER_SOURCE_IMAGE_ID"]
+  ssh_public_key  = module.github_env_read.variables["SERVER_SSH_PUBLIC_KEY"]
 }
 
 module "public_ip" {
