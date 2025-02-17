@@ -27,6 +27,16 @@ module "ad" {
   number         = module.github_env_read.variables["SERVER_AD_NUMBER"]
 }
 
+module "volume" {
+  source = "./modules/oci/volume"
+
+  compartment_id = module.compartment.id
+  name_suffix    = var.github_repository
+
+  ad_name     = module.ad.name
+  size_in_gbs = module.github_env_read.variables["SERVER_BLOCK_VOLUME_SIZE_IN_GBS"]
+}
+
 module "instance" {
   source = "./modules/oci/instance"
 
@@ -39,18 +49,8 @@ module "instance" {
   memory_in_gbs           = module.github_env_read.variables["SERVER_MEMORY_IN_GBS"]
   boot_volume_size_in_gbs = module.github_env_read.variables["SERVER_BOOT_VOLUME_SIZE_IN_GBS"]
   source_image_id         = module.github_env_read.variables["SERVER_SOURCE_IMAGE_ID"]
+  attached_volume_id      = module.volume.id
   ssh_public_key          = module.github_env_read.variables["SERVER_SSH_PUBLIC_KEY"]
-}
-
-module "volume" {
-  source = "./modules/oci/volume"
-
-  compartment_id = module.compartment.id
-  name_suffix    = var.github_repository
-
-  ad_name     = module.ad.name
-  instance_id = module.instance.id
-  size_in_gbs = module.github_env_read.variables["SERVER_BLOCK_VOLUME_SIZE_IN_GBS"]
 }
 
 module "public_ip" {
