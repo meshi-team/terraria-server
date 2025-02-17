@@ -24,11 +24,6 @@ variable "size_in_gbs" {
   }
 }
 
-variable "instance_id" {
-  description = "OCID of the instance to attach the volume to"
-  type        = string
-}
-
 variable "backup_id" {
   description = "OCID of the volume backup to restore the volume from"
   type        = string
