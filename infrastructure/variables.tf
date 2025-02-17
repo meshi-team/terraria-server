@@ -47,6 +47,32 @@ variable "cloudflare_domain" {
   type        = string
 }
 
+variable "github_organization" {
+  description = "GitHub organization name"
+  type        = string
+}
+
+variable "github_app_id" {
+  description = "GitHub App ID"
+  type        = number
+}
+
+variable "github_app_installation_id" {
+  description = "GitHub App installation ID"
+  type        = number
+}
+
+variable "github_app_private_key" {
+  description = "GitHub App private key"
+  type        = string
+  sensitive   = true
+}
+
+variable "github_repository" {
+  description = "GitHub repository name"
+  type        = string
+}
+
 variable "server_subdomain" {
   description = "Subdomain for the server"
   type        = string
