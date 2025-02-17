@@ -3,6 +3,12 @@ variable "compartment_id" {
   type        = string
 }
 
+variable "ad_name" {
+  description = "Availability Domain name in which to create the instance"
+  type        = string
+  default     = 1
+}
+
 variable "subnet_id" {
   description = "OCID of the subnet in which to create the instance"
   type        = string
@@ -18,17 +24,6 @@ variable "name_suffix" {
       "Name suffix must only contain alphanumeric characters,",
       "optionally separated by hyphens"
     ])
-  }
-}
-
-variable "ad_number" {
-  description = "Availability Domain number"
-  type        = number
-  default     = 1
-
-  validation {
-    condition     = var.ad_number > 0 && var.ad_number <= 3
-    error_message = "Availability Domain number must be between 1 and 3"
   }
 }
 

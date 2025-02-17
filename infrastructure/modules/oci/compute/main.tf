@@ -2,7 +2,7 @@ resource "oci_core_instance" "instance" {
   compartment_id = var.compartment_id
 
   display_name        = local.instance_name
-  availability_domain = data.oci_identity_availability_domain.ad.name
+  availability_domain = var.ad_name
 
   shape = "VM.Standard.A1.Flex"
   shape_config {

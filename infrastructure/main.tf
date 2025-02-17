@@ -20,12 +20,19 @@ module "network" {
   server_port = module.github_env_read.variables["SERVER_PORT"]
 }
 
+module "ad" {
+  source = "./modules/oci/availability_domain"
+
+  compartment_id = module.compartment.id
+}
+
 module "compute" {
   source = "./modules/oci/compute"
 
   compartment_id = module.compartment.id
   name_suffix    = var.github_repository
 
+  ad_name        = module.ad.name
   subnet_id      = module.network.subnet_id
   ocpus          = module.github_env_read.variables["SERVER_OCPUS"]
   memory_in_gbs  = module.github_env_read.variables["SERVER_MEMORY_IN_GBS"]
