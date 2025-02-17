@@ -39,7 +39,7 @@ runcmd:
     docker-compose-plugin
   - systemctl start docker
   - systemctl enable docker
-  - chown -R ubuntu:docker /mnt/data
+  - chown -R ubuntu:ubuntu /mnt/data
 
 groups:
   - docker
