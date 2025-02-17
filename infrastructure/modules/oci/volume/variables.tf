@@ -19,7 +19,7 @@ variable "size_in_gbs" {
   default     = 50
 
   validation {
-    condition     = var.size_in_gbs > 50 && var.size_in_gbs <= 200
+    condition     = var.size_in_gbs >= 50 && var.size_in_gbs <= 200
     error_message = "Size of the volume must be between 50 and 200 GBs"
   }
 }
