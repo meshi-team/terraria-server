@@ -26,8 +26,8 @@ module "ad" {
   compartment_id = module.compartment.id
 }
 
-module "compute" {
-  source = "./modules/oci/compute"
+module "instance" {
+  source = "./modules/oci/instance"
 
   compartment_id = module.compartment.id
   name_suffix    = var.github_repository
@@ -46,7 +46,7 @@ module "public_ip" {
   name_suffix    = var.github_repository
 
   subnet_id  = module.network.subnet_id
-  private_ip = module.compute.private_ip
+  private_ip = module.instance.private_ip
 }
 
 module "dns" {

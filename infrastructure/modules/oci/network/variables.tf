@@ -6,14 +6,6 @@ variable "compartment_id" {
 variable "name_suffix" {
   description = "Suffix to append to the resources names"
   type        = string
-
-  validation {
-    condition = can(regex("^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$", var.name_suffix))
-    error_message = join(" ", [
-      "Name suffix must only contain alphanumeric characters,",
-      "optionally separated by hyphens"
-    ])
-  }
 }
 
 variable "vcn_cidr_block" {

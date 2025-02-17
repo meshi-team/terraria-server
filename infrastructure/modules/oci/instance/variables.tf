@@ -1,5 +1,5 @@
 variable "compartment_id" {
-  description = "OCID of the compartment in which to create the resources"
+  description = "OCID of the compartment in which to create the instance"
   type        = string
 }
 
@@ -17,14 +17,6 @@ variable "subnet_id" {
 variable "name_suffix" {
   description = "Suffix to append to the resources names"
   type        = string
-
-  validation {
-    condition = can(regex("^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$", var.name_suffix))
-    error_message = join(" ", [
-      "Name suffix must only contain alphanumeric characters,",
-      "optionally separated by hyphens"
-    ])
-  }
 }
 
 variable "source_image_id" {
