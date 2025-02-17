@@ -1,18 +1,18 @@
 module "github_env_read" {
-  source = "./modules/github_env/read"
+  source = "./modules/github/env_read"
 
   github_repository = var.github_repository
 }
 
 module "compartment" {
-  source = "./modules/compartment"
+  source = "./modules/oci/compartment"
 
   parent_compartment_id = var.oci_compartment_id
   name                  = var.github_repository
 }
 
 module "network" {
-  source = "./modules/network"
+  source = "./modules/oci/network"
 
   compartment_id = module.compartment.id
   name_suffix    = var.github_repository
@@ -21,7 +21,7 @@ module "network" {
 }
 
 module "compute" {
-  source = "./modules/compute"
+  source = "./modules/oci/compute"
 
   compartment_id = module.compartment.id
   name_suffix    = var.github_repository
@@ -33,7 +33,7 @@ module "compute" {
 }
 
 module "public_ip" {
-  source = "./modules/public_ip"
+  source = "./modules/oci/public_ip"
 
   compartment_id = module.compartment.id
   name_suffix    = var.github_repository
@@ -43,7 +43,7 @@ module "public_ip" {
 }
 
 module "dns" {
-  source = "./modules/dns"
+  source = "./modules/cloudflare/dns"
 
   domain    = var.cloudflare_domain
   subdomain = module.github_env_read.variables["SERVER_SUBDOMAIN"]
@@ -51,7 +51,7 @@ module "dns" {
 }
 
 module "github_env_write" {
-  source = "./modules/github_env/write"
+  source = "./modules/github/env_write"
 
   github_repository = var.github_repository
 
