@@ -7,8 +7,3 @@ variable "name" {
   description = "The name of the compartment"
   type        = string
 }
-
-variable "description" {
-  description = "The description of the compartment"
-  type        = string
-}
