@@ -6,7 +6,6 @@ variable "compartment_id" {
 variable "ad_name" {
   description = "Availability Domain name in which to create the instance"
   type        = string
-  default     = 1
 }
 
 variable "subnet_id" {

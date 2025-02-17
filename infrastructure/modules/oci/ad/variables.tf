@@ -3,13 +3,13 @@ variable "compartment_id" {
   type        = string
 }
 
-variable "ad_number" {
+variable "number" {
   description = "Availability Domain number"
   type        = number
   default     = 1
 
   validation {
-    condition     = var.ad_number > 0 && var.ad_number <= 3
+    condition     = var.number > 0 && var.number <= 3
     error_message = "Availability Domain number must be between 1 and 3"
   }
 }
