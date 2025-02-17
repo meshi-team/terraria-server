@@ -8,6 +8,7 @@ output "variables" {
     "SERVER_AD_NUMBER"                = local.github_env_vars["SERVER_AD_NUMBER"],
     "SERVER_BOOT_VOLUME_SIZE_IN_GBS"  = local.github_env_vars["SERVER_BOOT_VOLUME_SIZE_IN_GBS"],
     "SERVER_BLOCK_VOLUME_SIZE_IN_GBS" = local.github_env_vars["SERVER_BLOCK_VOLUME_SIZE_IN_GBS"],
+    "SERVER_BLOCK_VOLUME_BACKUP_ID"   = try(local.github_env_vars["SERVER_BLOCK_VOLUME_BACKUP_ID"], ""),
     "SERVER_MEMORY_IN_GBS"            = local.github_env_vars["SERVER_MEMORY_IN_GBS"],
     "SERVER_OCPUS"                    = local.github_env_vars["SERVER_OCPUS"],
     "SERVER_PORT"                     = local.github_env_vars["SERVER_PORT"],

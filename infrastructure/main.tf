@@ -35,6 +35,7 @@ module "volume" {
 
   ad_name     = module.ad.name
   size_in_gbs = module.github_env_read.variables["SERVER_BLOCK_VOLUME_SIZE_IN_GBS"]
+  backup_id   = module.github_env_read.variables["SERVER_BLOCK_VOLUME_BACKUP_ID"]
 }
 
 module "instance" {
