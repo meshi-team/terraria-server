@@ -10,7 +10,7 @@ module "network" {
   compartment_id = var.oci_compartment_id
   name_suffix    = var.github_repository
 
-  server_port = module.github_env_read.outputs.variables["SERVER_PORT"]
+  server_port = module.github_env_read.variables["SERVER_PORT"]
 }
 
 module "compute" {
@@ -20,9 +20,9 @@ module "compute" {
   name_suffix    = var.github_repository
 
   subnet_id      = module.network.subnet_id
-  ocpus          = module.github_env_read.outputs.variables["SERVER_OCPUS"]
-  memory_in_gbs  = module.github_env_read.outputs.variables["SERVER_MEMORY_IN_GBS"]
-  ssh_public_key = module.github_env_read.outputs.variables["SERVER_SSH_PUBLIC_KEY"]
+  ocpus          = module.github_env_read.variables["SERVER_OCPUS"]
+  memory_in_gbs  = module.github_env_read.variables["SERVER_MEMORY_IN_GBS"]
+  ssh_public_key = module.github_env_read.variables["SERVER_SSH_PUBLIC_KEY"]
 }
 
 module "public_ip" {
@@ -39,7 +39,7 @@ module "dns" {
   source = "./modules/dns"
 
   domain    = var.cloudflare_domain
-  subdomain = module.github_env_read.outputs.variables["SERVER_SUBDOMAIN"]
+  subdomain = module.github_env_read.variables["SERVER_SUBDOMAIN"]
   target    = module.public_ip.public_ip
 }
 
