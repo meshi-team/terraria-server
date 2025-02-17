@@ -1,4 +1,4 @@
-resource "github_actions_variable" "server_domain" {
+resource "github_actions_variable" "variables" {
   for_each = var.variables
 
   repository = var.github_repository

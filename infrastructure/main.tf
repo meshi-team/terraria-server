@@ -4,10 +4,17 @@ module "github_env_read" {
   github_repository = var.github_repository
 }
 
+module "compartment" {
+  source = "./modules/compartment"
+
+  parent_compartment_id = var.oci_compartment_id
+  name                  = var.github_repository
+}
+
 module "network" {
   source = "./modules/network"
 
-  compartment_id = var.oci_compartment_id
+  compartment_id = module.compartment.id
   name_suffix    = var.github_repository
 
   server_port = module.github_env_read.variables["SERVER_PORT"]
@@ -16,7 +23,7 @@ module "network" {
 module "compute" {
   source = "./modules/compute"
 
-  compartment_id = var.oci_compartment_id
+  compartment_id = module.compartment.id
   name_suffix    = var.github_repository
 
   subnet_id      = module.network.subnet_id
@@ -28,7 +35,7 @@ module "compute" {
 module "public_ip" {
   source = "./modules/public_ip"
 
-  compartment_id = var.oci_compartment_id
+  compartment_id = module.compartment.id
   name_suffix    = var.github_repository
 
   subnet_id  = module.network.subnet_id
