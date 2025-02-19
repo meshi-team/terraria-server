@@ -1,5 +1,5 @@
 {
-  "name": "soruba-master",
+  "name": "terraria-server",
   "type": "module",
   "scripts": {
     "lint": "eslint .",
