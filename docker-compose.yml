@@ -1,3 +1,5 @@
+name: terraria-server
+
 services:
   devcontainer:
     image: terraria-meshi-team-devcontainer
