@@ -7,7 +7,7 @@ FROM mcr.microsoft.com/devcontainers/base:1-bookworm
 ARG DEVCONTAINER_USER=vscode
 ARG DEVCONTAINER_USER_HOME="/home/${DEVCONTAINER_USER}"
 
-ENV CONTAINER_WORKSPACE_FOLDER="${CONTAINER_WORKSPACE_FOLDER:-/workspaces/terraria-meshi-team}"
+ENV CONTAINER_WORKSPACE_FOLDER="${CONTAINER_WORKSPACE_FOLDER:-/workspaces/terraria-server}"
 
 # Set the pipefail option to ensure correct exit codes for piped commands.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]

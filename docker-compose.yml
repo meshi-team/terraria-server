@@ -1,7 +1,9 @@
+name: terraria-server
+
 services:
   devcontainer:
-    image: terraria-meshi-team-devcontainer
-    container_name: terraria-meshi-team-devcontainer
+    image: terraria-server-devcontainer
+    container_name: terraria-server-devcontainer
     build:
       context: .
       dockerfile: .devcontainer/Dockerfile
@@ -12,10 +14,10 @@ services:
       # Mount the Docker daemon socket so the devcontainer can run Docker commands
       - /var/run/docker.sock:/var/run/docker-host.sock
       # Mount the project directory as the working directory
-      - ${LOCAL_WORKSPACE_FOLDER:-.}:${CONTAINER_WORKSPACE_FOLDER:-/workspaces/terraria-meshi-team}
+      - ${LOCAL_WORKSPACE_FOLDER:-.}:${CONTAINER_WORKSPACE_FOLDER:-/workspaces/terraria-server}
       # Mount a volume for node_modules
-      - devcontainer-node_modules:${CONTAINER_WORKSPACE_FOLDER:-/workspaces/terraria-meshi-team}/node_modules
+      - devcontainer-node_modules:${CONTAINER_WORKSPACE_FOLDER:-/workspaces/terraria-server}/node_modules
 
 volumes:
   devcontainer-node_modules:
-    name: terraria-meshi-team-devcontainer-node_modules
+    name: terraria-server-devcontainer-node_modules
