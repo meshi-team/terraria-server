@@ -77,7 +77,7 @@ module "github_env_write" {
 
   github_repository = var.github_repository
 
-  variables = {
+  secrets = {
     SERVER_DOMAIN    = module.dns.full_domain
     SERVER_PUBLIC_IP = module.public_ip.public_ip
   }

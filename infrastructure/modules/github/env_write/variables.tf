@@ -6,4 +6,11 @@ variable "github_repository" {
 variable "variables" {
   description = "Map of variables to set in the GitHub repository"
   type        = map(string)
+  default     = {}
+}
+
+variable "secrets" {
+  description = "Map of secrets to set in the GitHub repository"
+  type        = map(string)
+  default     = {}
 }
