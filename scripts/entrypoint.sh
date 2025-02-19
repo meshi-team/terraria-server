@@ -28,5 +28,14 @@ else
   exit 1
 fi
 
+# Create necessary directories
+mkdir -p $WORLDS_FOLDER
+mkdir -p $LOGS_FOLDER
+
+touch $LOGS_FILE
+touch $BANLIST_FILE
+
 # Start the Terraria server
-$SERVER_FOLDER/$SERVER_BIN -config $CONFIG_FOLDER/$CONFIG_FILE -logpath $LOG_FILE
+$SERVER_FOLDER/$SERVER_BIN \
+  -config $CONFIG_FOLDER/$CONFIG_FILE \
+  -logpath $LOGS_FOLDER/$LOGS_FOLDER
