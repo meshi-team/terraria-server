@@ -27,7 +27,7 @@ WORKDIR /terraria-server
 COPY ./scripts ./scripts
 COPY ./config ./config
 
-ENV ENV_FILE=/terraria-server/config/config-environment.env
+ENV ENV_SCRIPT=/terraria-server/scripts/load-env.sh
 
 # Remove unnecessary files
 RUN mv /tmp-downloads/*/Linux/* /terraria-server \

@@ -3,13 +3,13 @@
 # This script initializes the Terraria server by loading environment variables
 # and generating the server configuration file.
 
-# 1. Load environment variables from the .env file
+# 1. Load environment variables fron the env script
 # 2. Generate the server configuration file based on the environment variables
 # 3. Start the Terraria server with the generated configuration
 
 # Usage: ./scripts/entrypoint.sh
 
-ENV_SCRIPT="/terraria-server/scripts/load-env-file.sh"
+ENV_SCRIPT="/terraria-server/scripts/load-env.sh"
 CONFIG_SCRIPT="/terraria-server/scripts/generate-server-config.sh"
 
 # Source the environment loading script
