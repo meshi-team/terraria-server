@@ -3,8 +3,9 @@
 
 # Enable all rules
 enable=all
+
+# Directives
 source-path=SCRIPTDIR
+external-sources=true
 
 # Disable specific rules
-# disable=SC2154 # var is referenced but not assigned.
-# disable=SC2312 # Consider invoking this command separately to avoid masking its return value (or use '|| true' to ignore).
