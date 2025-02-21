@@ -202,6 +202,7 @@ jobs:
         uses: hadolint/hadolint-action@v3.1.0
         with:
           config: ./.config/.hadolint.yml
+          dockerfile: Dockerfile
           recursive: true
 
   # Run yamllint on all YAML files.
