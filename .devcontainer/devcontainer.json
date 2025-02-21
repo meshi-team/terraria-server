@@ -244,9 +244,11 @@
         // - Use installed hadolint
         "hadolint.hadolintPath": "/usr/local/bin/hadolint",
         // - Configuration location
-        // "hadolint.cliOptions": [
-        //   "--config ${containerWorkspaceFolder}/.config/.hadolint.yml"
-        // ],
+        "hadolint.cliOptions": [
+          "--config",
+          "${containerWorkspaceFolder}/.config/.hadolint.yml",
+          "--no-color"
+        ],
 
         // yamllint
         // - Use installed yamllint

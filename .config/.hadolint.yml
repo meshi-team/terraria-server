@@ -1,0 +1,13 @@
+# hadolint configuration file.
+# https://github.com/hadolint/hadolint?tab=readme-ov-file#configure
+
+failure-threshold: warning
+
+# Ignored rules.
+ignored:
+  - DL3008
+
+trustedRegistries:
+  - docker.io
+  - ghcr.io
+  - mcr.microsoft.com

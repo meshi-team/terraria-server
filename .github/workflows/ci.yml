@@ -1,0 +1,319 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
+
+jobs:
+  # Check if the PR title is valid.
+  # A valid title is in the format "<type>(<scope>): <subject>".
+  # -> Fails if the title is invalid.
+  validate-pr-title:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        github.event.action == 'opened' ||
+        github.event.action == 'reopened' ||
+        github.event.action == 'edited'
+      )
+    steps:
+      # This step is done so that the GitHub App (meshi-team-bot)
+      # is the author of the PR error comment.
+      - name: Create meshi-team-bot[bot] token
+        uses: actions/create-github-app-token@v1
+        id: token
+        with:
+          app-id: ${{ vars.MESHI_TEAM_BOT_APP_ID }}
+          private-key: ${{ secrets.MESHI_TEAM_BOT_PRIVATE_KEY }}
+
+      - name: Validate PR title
+        id: validate
+        continue-on-error: true
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ steps.token.outputs.token }}
+        with:
+          types: |
+            feat
+            fix
+            refactor
+            revert
+            chore
+            ci
+            docs
+          requireScope: false
+          subjectPattern: ^[a-z].+$
+
+      - name: Add PR comment with error message
+        if: ${{ steps.validate.outputs.error_message != null }}
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          GITHUB_TOKEN: ${{ steps.token.outputs.token }}
+          header: validate-pr-title
+          recreate: true
+          message: |
+            PR title must be in the format `<type>(<scope>): <subject>`.
+
+            - Valid types are: `feat`, `fix`, `refactor`, `revert`, `chore`, `ci`, `docs`.
+            - The scope is optional.
+            - The subject must start with a lowercase letter.
+
+            Change the PR title accordingly.
+
+            Details:
+
+            ```
+            ${{ steps.validate.outputs.error_message }}
+            ```
+
+      - name: Delete PR comment
+        if: ${{ steps.validate.outputs.error_message == null }}
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          GITHUB_TOKEN: ${{ steps.token.outputs.token }}
+          header: validate-pr-title
+          delete: true
+
+  # Check if files have been modified.
+  # The outputs can be used to check if there are any changes.
+  # Each output for that type of check will be 'true' if there are changes.
+  files-changed:
+    name: Check files for changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      terraform: ${{ contains(steps.check.outputs.modified_keys, 'terraform') }}
+      hadolint: ${{ contains(steps.check.outputs.modified_keys, 'hadolint') }}
+      yamllint: ${{ contains(steps.check.outputs.modified_keys, 'yamllint') }}
+      eslint: ${{ contains(steps.check.outputs.modified_keys, 'eslint') }}
+      prettier: ${{ contains(steps.check.outputs.modified_keys, 'prettier') }}
+    if: |
+      github.event_name == 'push' ||
+      (
+        github.event_name == 'pull_request' &&
+        (
+          github.event.action == 'opened' ||
+          github.event.action == 'reopened' ||
+          github.event.action == 'synchronize'
+        )
+      )
+    steps:
+      - name: Checkout code (on push)
+        if: ${{ github.event_name == 'push' }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Checkout code (on pull request)
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check files for changes
+        id: check
+        uses: tj-actions/changed-files@v45
+        with:
+          files_yaml: |
+            terraform:
+              - "**/*.tf"
+              - "**/*.hcl"
+            hadolint:
+              - "./.config/.hadolint.yml"
+              - "**/Dockerfile"
+            yamllint:
+              - "./.config/.yamllint.yml"
+              - "**/*.yml"
+              - "**/*.yaml"
+            eslint:
+              - "./.config/.eslint.config.mjs"
+              - "**/*.json"
+              - "**/*.js"
+              - "**/*.mjs"
+              - "**/*.cjs"
+            prettier:
+              - "./.config/.prettierrc.yml"
+              - "./.config/.prettierignore"
+              - "**/*.yml"
+              - "**/*.yaml"
+              - "**/*.json"
+              - "**/*.md"
+              - "**/*.js"
+              - "**/*.mjs"
+              - "**/*.cjs"
+
+  # Run terraform fmt on the Terraform files.
+  # -> Fails if there are any formatting issues.
+  tf-fmt:
+    name: Terraform format check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs:
+      - files-changed
+    if: ${{ needs.files-changed.outputs.terraform == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run terraform fmt
+        shell: bash
+        working-directory: ./infrastructure
+        run: terraform fmt -check -recursive -diff -no-color
+
+  # Run terraform validate on the Terraform files.
+  # -> Fails if there are any validation issues.
+  tf-validate:
+    name: Terraform validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs:
+      - files-changed
+    if: ${{ needs.files-changed.outputs.terraform == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run terraform validate
+        shell: bash
+        working-directory: ./infrastructure
+        run: terraform validate -no-color
+
+  # Run hadolint on all Dockerfiles.
+  # -> Fails if there are any linting issues.
+  hadolint:
+    name: Lint Dockerfiles
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs:
+      - files-changed
+    if: ${{ needs.files-changed.outputs.hadolint == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          config: ./.config/.hadolint.yml
+          dockerfile: "**/Dockerfile"
+          recursive: true
+
+  # Run yamllint on all YAML files.
+  # -> Fails if there are any linting issues.
+  yamllint:
+    name: Lint YAML
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs:
+      - files-changed
+    if: ${{ needs.files-changed.outputs.yamllint == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run yamllint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          config_file: ./.config/.yamllint.yml
+          strict: true
+
+  # Run ESLint on all supported files.
+  # -> Fails if there are any linting issues.
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs:
+      - files-changed
+    if: ${{ needs.files-changed.outputs.eslint == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        shell: bash
+        run: npm ci --no-audit --no-progress
+
+      - name: Run ESLint
+        shell: bash
+        run: npm run --silent ci:eslint
+
+  # Run Prettier on all supported files.
+  # -> Fails if there are any formatting issues.
+  prettier:
+    name: Prettier
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs:
+      - files-changed
+    if: ${{ needs.files-changed.outputs.prettier == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        shell: bash
+        run: npm ci --no-audit --no-progress
+
+      - name: Run prettier
+        shell: bash
+        run: npm run --silent ci:prettier
+
+  # Block the PR until all checks have passed.
+  checks-passed:
+    name: CI checks passed
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs:
+      - validate-pr-title
+      - tf-fmt
+      - tf-validate
+      - yamllint
+      - hadolint
+      - eslint
+      - prettier
+    if: always()
+    steps:
+      - name: Fail if any check failed
+        shell: bash
+        run: |
+          JOBS=$(echo '${{ toJson(needs) }}' | jq -r "keys[]" | xargs)
+
+          for JOB in $JOBS; do
+            RESULT=$(echo '${{ toJson(needs) }}' | jq -r ".[\"$JOB\"].result")
+            if [[ "$RESULT" != "success" && "$RESULT" != "skipped" ]]; then
+              echo "Job: '$JOB' failed with result: '$RESULT'"
+              exit 1
+            fi
+          done
