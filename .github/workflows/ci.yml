@@ -99,6 +99,8 @@ jobs:
       terraform: ${{ contains(steps.check.outputs.modified_keys, 'terraform') }}
       hadolint: ${{ contains(steps.check.outputs.modified_keys, 'hadolint') }}
       yamllint: ${{ contains(steps.check.outputs.modified_keys, 'yamllint') }}
+      shellcheck: ${{ contains(steps.check.outputs.modified_keys, 'shellcheck') }}
+      shfmt: ${{ contains(steps.check.outputs.modified_keys, 'shfmt') }}
       eslint: ${{ contains(steps.check.outputs.modified_keys, 'eslint') }}
       prettier: ${{ contains(steps.check.outputs.modified_keys, 'prettier') }}
     if: |
@@ -139,6 +141,11 @@ jobs:
               - "./.config/.yamllint.yml"
               - "**/*.yml"
               - "**/*.yaml"
+            shellcheck:
+              - "./.config/.shellcheckrc"
+              - "**/*.sh"
+            shfmt:
+              - "**/*.sh"
             eslint:
               - "./.config/.eslint.config.mjs"
               - "**/*.json"
@@ -234,6 +241,52 @@ jobs:
         with:
           config_file: ./.config/.yamllint.yml
           strict: true
+
+  # Run shellcheck on all shell scripts.
+  # -> Fails if there are any linting issues.
+  shellcheck:
+    name: Lint shell scripts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs:
+      - files-changed
+    if: ${{ needs.files-changed.outputs.shellcheck == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run shellcheck
+        uses: luizm/action-sh-checker@v0.9.0
+        with:
+          sh_checker_shfmt_disable: true
+          sh_checker_comment: false
+          sh_checker_checkbashisms_enable: false
+        env:
+          SHELLCHECK_OPTS: --rcfile=./.config/.shellcheckrc
+
+  # Run shfmt on all shell scripts.
+  # -> Fails if there are any formatting issues.
+  shfmt:
+    name: Shell script format check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs:
+      - files-changed
+    if: ${{ needs.files-changed.outputs.shfmt == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run shfmt
+        uses: luizm/action-sh-checker@v0.9.0
+        with:
+          sh_checker_shellcheck_disable: true
+          sh_checker_comment: false
+          sh_checker_checkbashisms_enable: false
+        env:
+          SHFMT_OPTS: --diff
 
   # Run ESLint on all supported files.
   # -> Fails if there are any linting issues.
