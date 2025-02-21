@@ -8,5 +8,6 @@ ignored:
   - DL3008
 
 trustedRegistries:
-  - mcr.microsoft.com
+  # - docker.io
   - ghcr.io
+  # - mcr.microsoft.com
