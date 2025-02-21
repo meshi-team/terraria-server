@@ -173,6 +173,23 @@ jobs:
           config_file: ./.config/.yamllint.yml
           strict: true
 
+  # Run hadolint on all Dockerfiles.
+  # -> Fails if there are any linting issues.
+  hadolint:
+    name: Lint Dockerfiles
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          config: ./.config/.hadolint.yml
+          recursive: true
+
   # Run ESLint on all supported files.
   # -> Fails if there are any linting issues.
   eslint:
@@ -230,6 +247,7 @@ jobs:
       - tf-fmt
       - tf-validate
       - yamllint
+      - hadolint
       - eslint
       - prettier
     if: always()
