@@ -159,7 +159,7 @@ jobs:
   # Run yamllint on all YAML files.
   # -> Fails if there are any linting issues.
   yamllint:
-    name: YAML lint
+    name: Lint YAML
     runs-on: ubuntu-latest
     permissions:
       contents: read
