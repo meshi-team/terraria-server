@@ -8,4 +8,5 @@ ignored:
   - DL3008
 
 trustedRegistries:
+  - docker.io
   - ghcr.io
