@@ -1,0 +1,10 @@
+# ShellCheck configuration file
+# https://www.shellcheck.net/wiki/
+
+# Enable all rules
+enable=all
+source-path=SCRIPTDIR
+
+# Disable specific rules
+# disable=SC2154 # var is referenced but not assigned.
+# disable=SC2312 # Consider invoking this command separately to avoid masking its return value (or use '|| true' to ignore).
