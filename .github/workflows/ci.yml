@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
+
+jobs:
+  # Checks if the PR title is valid.
+  # A valid title is in the format "<type>(<scope>): <subject>".
+  validate-pr-title:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        github.event.action == 'opened' ||
+        github.event.action == 'reopened' ||
+        github.event.action == 'edited'
+      )
+    permissions:
+      contents: read
+    steps:
+      # This step is done so that the GitHub App (meshi-team-bot)
+      # is the author of the PR error comment.
+      - name: Create meshi-team-bot[bot] token
+        uses: actions/create-github-app-token@v1
+        id: token
+        with:
+          app-id: ${{ vars.MESHI_TEAM_BOT_APP_ID }}
+          private-key: ${{ secrets.MESHI_TEAM_BOT_PRIVATE_KEY }}
+
+      - name: Validate PR title
+        id: validate
+        continue-on-error: true
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ steps.token.outputs.token }}
+        with:
+          types: |
+            feat
+            fix
+            refactor
+            revert
+            chore
+            ci
+            docs
+          requireScope: false
+          subjectPattern: ^[a-z].+$
+
+      - name: Add PR comment with error message
+        if: ${{ steps.validate.outputs.error_message != null }}
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          GITHUB_TOKEN: ${{ steps.token.outputs.token }}
+          header: validate-pr-title
+          recreate: true
+          message: |
+            PR title must be in the format `<type>(<scope>): <subject>`.
+
+            - Valid types are: `feat`, `fix`, `refactor`, `revert`, `chore`, `ci`, `docs`.
+            - The scope is optional.
+            - The subject must start with a lowercase letter.
+
+            Change the PR title accordingly.
+
+            Details:
+
+            ```
+            ${{ steps.validate.outputs.error_message }}
+            ```
+
+      - name: Delete PR comment
+        if: ${{ steps.validate.outputs.error_message == null }}
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          GITHUB_TOKEN: ${{ steps.token.outputs.token }}
+          header: validate-pr-title
+          delete: true
