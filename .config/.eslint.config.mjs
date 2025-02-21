@@ -9,4 +9,8 @@ export default [
     files: ["**/*.json"],
     ...json.configs["recommended-with-comments"],
   },
+  // Ignored files.
+  {
+    ignores: ["**/node_modules", "**/.terraform"],
+  },
 ];

@@ -2,9 +2,11 @@
   "name": "terraria-server",
   "type": "module",
   "scripts": {
-    "lint": "eslint .",
-    "lint-fix": "eslint --fix .",
-    "format": "prettier --write ."
+    "lint": "eslint --config ./.config/.eslint.config.mjs .",
+    "lint-fix": "eslint --config ./.config/.eslint.config.mjs --fix .",
+    "format": "prettier --config ./.config/.prettierrc.yml --ignore-path ./.config/.prettierignore --write .",
+    "ci:eslint": "eslint --config ./.config/.eslint.config.mjs --max-warnings 0 --no-color .",
+    "ci:prettier": "prettier --config ./.config/.prettierrc.yml --ignore-path ./.config/.prettierignore --check --no-color ."
   },
   "devDependencies": {
     "eslint": "^9.20.0",
