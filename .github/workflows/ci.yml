@@ -101,6 +101,16 @@ jobs:
       yamllint: ${{ contains(steps.check.outputs.modified_keys, 'yamllint') }}
       eslint: ${{ contains(steps.check.outputs.modified_keys, 'eslint') }}
       prettier: ${{ contains(steps.check.outputs.modified_keys, 'prettier') }}
+    if: |
+      github.event_name == 'push' ||
+      (
+        github.event_name == 'pull_request' &&
+        (
+          github.event.action == 'opened' ||
+          github.event.action == 'reopened' ||
+          github.event.action == 'synchronize'
+        )
+      )
     steps:
       - name: Checkout code (on push)
         if: ${{ github.event_name == 'push' }}
