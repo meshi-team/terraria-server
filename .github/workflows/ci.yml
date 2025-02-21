@@ -14,8 +14,9 @@ on:
       - edited
 
 jobs:
-  # Checks if the PR title is valid.
+  # Check if the PR title is valid.
   # A valid title is in the format "<type>(<scope>): <subject>".
+  # -> Fails if the title is invalid.
   validate-pr-title:
     name: Validate PR title
     runs-on: ubuntu-latest
@@ -85,3 +86,68 @@ jobs:
           GITHUB_TOKEN: ${{ steps.token.outputs.token }}
           header: validate-pr-title
           delete: true
+
+  # Check if Terraform files have been modified.
+  # The output "changed" can be used to check if there are any changes.
+  # -> changed: 'true' if there are changes, 'false' otherwise.
+  tf-files-changed:
+    name: Terraform files changed
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.check.outputs.any_modified }}
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code (on push)
+        if: ${{ github.event_name == 'push' }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Checkout code (on pull request)
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check files for changes
+        id: check
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            **/*.tf
+            **/*.hcl
+
+  # Run terraform fmt on the Terraform files.
+  # -> Fails if there are any formatting issues.
+  tf-fmt:
+    name: Terraform format check
+    runs-on: ubuntu-latest
+    needs:
+      - tf-files-changed
+    if: ${{ needs.tf-files-changed.outputs.changed == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Terraform fmt
+        shell: bash
+        working-directory: ./infrastructure
+        run: terraform fmt -check -recursive -diff -no-color
+
+  # Run terraform validate on the Terraform files.
+  # -> Fails if there are any validation issues.
+  tf-validate:
+    name: Terraform validate
+    runs-on: ubuntu-latest
+    needs:
+      - tf-files-changed
+    if: ${{ needs.tf-files-changed.outputs.changed == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Terraform validate
+        shell: bash
+        working-directory: ./infrastructure
+        run: terraform validate -no-color
