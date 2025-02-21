@@ -268,7 +268,7 @@ jobs:
   # Run shfmt on all shell scripts.
   # -> Fails if there are any formatting issues.
   shfmt:
-    name: Shell script format check
+    name: Format shell scripts
     runs-on: ubuntu-latest
     permissions:
       contents: read
