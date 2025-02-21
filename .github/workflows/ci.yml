@@ -91,7 +91,7 @@ jobs:
   # The outputs can be used to check if there are any changes.
   # Each output for that type of check will be 'true' if there are changes.
   files-changed:
-    name: Terraform files changed
+    name: Check files for changes
     runs-on: ubuntu-latest
     permissions:
       contents: read
