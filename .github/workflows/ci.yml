@@ -132,7 +132,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Terraform fmt
+      - name: Run terraform fmt
         shell: bash
         working-directory: ./infrastructure
         run: terraform fmt -check -recursive -diff -no-color
@@ -151,7 +151,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Terraform validate
+      - name: Run terraform validate
         shell: bash
         working-directory: ./infrastructure
         run: terraform validate -no-color
@@ -167,11 +167,55 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: YAML lint
+      - name: Run yamllint
         uses: ibiqlik/action-yamllint@v3
         with:
           config_file: ./.config/.yamllint.yml
           strict: true
+
+  # Run ESLint on all supported files.
+  # -> Fails if there are any linting issues.
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: ./package-lock.json
+
+      - name: Run ESLint
+        shell: bash
+        run: npm run --silent ci:eslint
+
+  # Run Prettier on all supported files.
+  # -> Fails if there are any formatting issues.
+  prettier:
+    name: Prettier
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: ./package-lock.json
+
+      - name: Run prettier
+        shell: bash
+        run: npm run --silent ci:prettier
 
   # Block the PR until all checks have passed.
   checks-passed:
@@ -182,6 +226,8 @@ jobs:
       - tf-fmt
       - tf-validate
       - yamllint
+      - eslint
+      - prettier
     if: always()
     permissions:
       contents: read
