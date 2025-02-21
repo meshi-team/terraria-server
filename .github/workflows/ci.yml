@@ -97,11 +97,10 @@ jobs:
       contents: read
     outputs:
       terraform: ${{ contains(steps.check.outputs.modified_keys, 'terraform') }}
-      dockerfile: ${{ contains(steps.check.outputs.modified_keys, 'dockerfile') }}
-      yaml: ${{ contains(steps.check.outputs.modified_keys, 'yaml') }}
-      javascript: ${{ contains(steps.check.outputs.modified_keys, 'javascript') }}
-      json: ${{ contains(steps.check.outputs.modified_keys, 'json') }}
-      markdown: ${{ contains(steps.check.outputs.modified_keys, 'markdown') }}
+      hadolint: ${{ contains(steps.check.outputs.modified_keys, 'hadolint') }}
+      yamllint: ${{ contains(steps.check.outputs.modified_keys, 'yamllint') }}
+      eslint: ${{ contains(steps.check.outputs.modified_keys, 'eslint') }}
+      prettier: ${{ contains(steps.check.outputs.modified_keys, 'prettier') }}
     steps:
       - name: Checkout code (on push)
         if: ${{ github.event_name == 'push' }}
@@ -123,16 +122,26 @@ jobs:
             terraform:
               - "**/*.tf"
               - "**/*.hcl"
-            dockerfile:
-              - "**/*Dockerfile*"
-            yaml:
+            hadolint:
+              - "./.config/.hadolint.yml"
+              - "**/Dockerfile"
+            yamllint:
+              - "./.config/.yamllint.yml"
               - "**/*.yml"
               - "**/*.yaml"
-            json:
+            eslint:
+              - "./.config/.eslint.config.mjs"
               - "**/*.json"
-            markdown:
+              - "**/*.js"
+              - "**/*.mjs"
+              - "**/*.cjs"
+            prettier:
+              - "./.config/.prettierrc.yml"
+              - "./.config/.prettierignore"
+              - "**/*.yml"
+              - "**/*.yaml"
+              - "**/*.json"
               - "**/*.md"
-            javascript:
               - "**/*.js"
               - "**/*.mjs"
               - "**/*.cjs"
@@ -184,7 +193,7 @@ jobs:
       contents: read
     needs:
       - files-changed
-    if: ${{ needs.files-changed.outputs.dockerfile == 'true' }}
+    if: ${{ needs.files-changed.outputs.hadolint == 'true' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -204,7 +213,7 @@ jobs:
       contents: read
     needs:
       - files-changed
-    if: ${{ needs.files-changed.outputs.yaml == 'true' }}
+    if: ${{ needs.files-changed.outputs.yamllint == 'true' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -224,11 +233,7 @@ jobs:
       contents: read
     needs:
       - files-changed
-    if: |
-      (
-        needs.files-changed.outputs.javascript == 'true' ||
-        needs.files-changed.outputs.json == 'true'
-      )
+    if: ${{ needs.files-changed.outputs.eslint == 'true' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -255,13 +260,7 @@ jobs:
       contents: read
     needs:
       - files-changed
-    if: |
-      (
-        needs.files-changed.outputs.yaml == 'true' ||
-        needs.files-changed.outputs.javascript == 'true' ||
-        needs.files-changed.outputs.json == 'true' ||
-        needs.files-changed.outputs.markdown == 'true'
-      )
+    if: ${{ needs.files-changed.outputs.prettier == 'true' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
