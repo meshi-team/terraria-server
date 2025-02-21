@@ -87,14 +87,14 @@ jobs:
           header: validate-pr-title
           delete: true
 
-  # Check if Terraform files have been modified.
-  # The output "changed" can be used to check if there are any changes.
-  # -> changed: 'true' if there are changes, 'false' otherwise.
-  tf-files-changed:
+  # Check if files have been modified.
+  # The outputs can be used to check if there are any changes.
+  # Each output for that type of check will be 'true' if there are changes.
+  files-changed:
     name: Terraform files changed
     runs-on: ubuntu-latest
     outputs:
-      changed: ${{ steps.check.outputs.any_modified }}
+      terraform: ${{ contains(steps.check.outputs.modified_keys, 'terraform') }}
     permissions:
       contents: read
     steps:
@@ -114,9 +114,10 @@ jobs:
         id: check
         uses: tj-actions/changed-files@v45
         with:
-          files: |
-            **/*.tf
-            **/*.hcl
+          files_yaml: |
+            terraform:
+              - "**/*.tf"
+              - "**/*.hcl"
 
   # Run terraform fmt on the Terraform files.
   # -> Fails if there are any formatting issues.
@@ -124,8 +125,8 @@ jobs:
     name: Terraform format check
     runs-on: ubuntu-latest
     needs:
-      - tf-files-changed
-    if: ${{ needs.tf-files-changed.outputs.changed == 'true' }}
+      - files-changed
+    if: ${{ needs.files-changed.outputs.terraform == 'true' }}
     permissions:
       contents: read
     steps:
@@ -143,8 +144,8 @@ jobs:
     name: Terraform validate
     runs-on: ubuntu-latest
     needs:
-      - tf-files-changed
-    if: ${{ needs.tf-files-changed.outputs.changed == 'true' }}
+      - files-changed
+    if: ${{ needs.files-changed.outputs.terraform == 'true' }}
     permissions:
       contents: read
     steps:
