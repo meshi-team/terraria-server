@@ -126,6 +126,8 @@ jobs:
     needs:
       - tf-files-changed
     if: ${{ needs.tf-files-changed.outputs.changed == 'true' }}
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -143,6 +145,8 @@ jobs:
     needs:
       - tf-files-changed
     if: ${{ needs.tf-files-changed.outputs.changed == 'true' }}
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -157,6 +161,8 @@ jobs:
   yamllint:
     name: YAML lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -166,3 +172,29 @@ jobs:
         with:
           config_file: ./.config/.yamllint.yml
           strict: true
+
+  # Block the PR until all checks have passed.
+  checks-passed:
+    name: CI checks passed
+    runs-on: ubuntu-latest
+    needs:
+      - validate-pr-title
+      - tf-fmt
+      - tf-validate
+      - yamllint
+    if: always()
+    permissions:
+      contents: read
+    steps:
+      - name: Fail if any check failed
+        shell: bash
+        run: |
+          JOBS=$(echo '${{ toJson(needs) }}' | jq -r "keys[]" | xargs)
+
+          for JOB in $JOBS; do
+            RESULT=$(echo '${{ toJson(needs) }}' | jq -r ".[\"$JOB\"].result")
+            if [[ "$RESULT" != "success" && "$RESULT" != "skipped" ]]; then
+              echo "Job: '$JOB' failed with result: '$RESULT'"
+              exit 1
+            fi
+          done
