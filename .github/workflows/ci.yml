@@ -20,6 +20,8 @@ jobs:
   validate-pr-title:
     name: Validate PR title
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: |
       github.event_name == 'pull_request' &&
       (
@@ -27,8 +29,6 @@ jobs:
         github.event.action == 'reopened' ||
         github.event.action == 'edited'
       )
-    permissions:
-      contents: read
     steps:
       # This step is done so that the GitHub App (meshi-team-bot)
       # is the author of the PR error comment.
@@ -93,10 +93,15 @@ jobs:
   files-changed:
     name: Terraform files changed
     runs-on: ubuntu-latest
-    outputs:
-      terraform: ${{ contains(steps.check.outputs.modified_keys, 'terraform') }}
     permissions:
       contents: read
+    outputs:
+      terraform: ${{ contains(steps.check.outputs.modified_keys, 'terraform') }}
+      dockerfile: ${{ contains(steps.check.outputs.modified_keys, 'dockerfile') }}
+      yaml: ${{ contains(steps.check.outputs.modified_keys, 'yaml') }}
+      javascript: ${{ contains(steps.check.outputs.modified_keys, 'javascript') }}
+      json: ${{ contains(steps.check.outputs.modified_keys, 'json') }}
+      markdown: ${{ contains(steps.check.outputs.modified_keys, 'markdown') }}
     steps:
       - name: Checkout code (on push)
         if: ${{ github.event_name == 'push' }}
@@ -118,17 +123,30 @@ jobs:
             terraform:
               - "**/*.tf"
               - "**/*.hcl"
+            dockerfile:
+              - "**/*Dockerfile*"
+            yaml:
+              - "**/*.yml"
+              - "**/*.yaml"
+            json:
+              - "**/*.json"
+            markdown:
+              - "**/*.md"
+            javascript:
+              - "**/*.js"
+              - "**/*.mjs"
+              - "**/*.cjs"
 
   # Run terraform fmt on the Terraform files.
   # -> Fails if there are any formatting issues.
   tf-fmt:
     name: Terraform format check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs:
       - files-changed
     if: ${{ needs.files-changed.outputs.terraform == 'true' }}
-    permissions:
-      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -143,11 +161,11 @@ jobs:
   tf-validate:
     name: Terraform validate
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs:
       - files-changed
     if: ${{ needs.files-changed.outputs.terraform == 'true' }}
-    permissions:
-      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -157,23 +175,6 @@ jobs:
         working-directory: ./infrastructure
         run: terraform validate -no-color
 
-  # Run yamllint on all YAML files.
-  # -> Fails if there are any linting issues.
-  yamllint:
-    name: Lint YAML
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run yamllint
-        uses: ibiqlik/action-yamllint@v3
-        with:
-          config_file: ./.config/.yamllint.yml
-          strict: true
-
   # Run hadolint on all Dockerfiles.
   # -> Fails if there are any linting issues.
   hadolint:
@@ -181,6 +182,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    needs:
+      - files-changed
+    if: ${{ needs.files-changed.outputs.dockerfile == 'true' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -191,6 +195,26 @@ jobs:
           config: ./.config/.hadolint.yml
           recursive: true
 
+  # Run yamllint on all YAML files.
+  # -> Fails if there are any linting issues.
+  yamllint:
+    name: Lint YAML
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs:
+      - files-changed
+    if: ${{ needs.files-changed.outputs.yaml == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run yamllint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          config_file: ./.config/.yamllint.yml
+          strict: true
+
   # Run ESLint on all supported files.
   # -> Fails if there are any linting issues.
   eslint:
@@ -198,6 +222,13 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    needs:
+      - files-changed
+    if: |
+      (
+        needs.files-changed.outputs.javascript == 'true' ||
+        needs.files-changed.outputs.json == 'true'
+      )
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -222,6 +253,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    needs:
+      - files-changed
+    if: |
+      (
+        needs.files-changed.outputs.yaml == 'true' ||
+        needs.files-changed.outputs.javascript == 'true' ||
+        needs.files-changed.outputs.json == 'true' ||
+        needs.files-changed.outputs.markdown == 'true'
+      )
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -243,6 +283,8 @@ jobs:
   checks-passed:
     name: CI checks passed
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs:
       - validate-pr-title
       - tf-fmt
@@ -252,8 +294,6 @@ jobs:
       - eslint
       - prettier
     if: always()
-    permissions:
-      contents: read
     steps:
       - name: Fail if any check failed
         shell: bash
