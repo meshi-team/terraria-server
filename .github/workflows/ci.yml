@@ -354,6 +354,8 @@ jobs:
       - tf-validate
       - yamllint
       - hadolint
+      - shellcheck
+      - shfmt
       - eslint
       - prettier
     if: always()
