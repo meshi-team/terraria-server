@@ -188,8 +188,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: npm
-          cache-dependency-path: ./package-lock.json
+
+      - name: Install dependencies
+        shell: bash
+        run: npm ci --no-audit --no-progress
 
       - name: Run ESLint
         shell: bash
@@ -210,8 +212,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: npm
-          cache-dependency-path: ./package-lock.json
+
+      - name: Install dependencies
+        shell: bash
+        run: npm ci --no-audit --no-progress
 
       - name: Run prettier
         shell: bash
