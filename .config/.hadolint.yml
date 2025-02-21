@@ -10,4 +10,4 @@ ignored:
 trustedRegistries:
   - docker.io
   - ghcr.io
-  # - mcr.microsoft.com
+  - mcr.microsoft.com
