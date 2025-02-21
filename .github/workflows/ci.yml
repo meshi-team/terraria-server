@@ -151,3 +151,18 @@ jobs:
         shell: bash
         working-directory: ./infrastructure
         run: terraform validate -no-color
+
+  # Run yamllint on all YAML files.
+  # -> Fails if there are any linting issues.
+  yamllint:
+    name: YAML lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: YAML lint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          config_file: ./.config/.yamllint.yml
+          strict: true
