@@ -144,6 +144,8 @@
         "GitHub.copilot",
         // - Colorize indentation levels
         "oderwat.indent-rainbow",
+        // - Show errors inline
+        "usernamehw.errorlens",
 
         // Editor
         // - .editorconfig support
