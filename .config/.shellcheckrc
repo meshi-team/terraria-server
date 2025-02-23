@@ -1,0 +1,11 @@
+# ShellCheck configuration file
+# https://www.shellcheck.net/wiki/
+
+# Enable all rules
+enable=all
+
+# Directives
+source-path=SCRIPTDIR
+external-sources=true
+
+# Disable specific rules

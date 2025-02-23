@@ -7,23 +7,23 @@
 
 set -euo pipefail
 
-TEMPLATE_FILE="$CONFIG_FOLDER/$CONFIG_TEMPLATE"
+TEMPLATE_FILE="${CONFIG_FOLDER:?}/${CONFIG_TEMPLATE:?}"
 
-if [ ! -r "$TEMPLATE_FILE" ]; then
-  echo "Error: Template file '$TEMPLATE_FILE' not found or not readable." >&2
+if [[ ! -r "${TEMPLATE_FILE}" ]]; then
+  echo "Error: Template file '${TEMPLATE_FILE}' not found or not readable." >&2
   exit 1
 fi
 
 # Set the default world seed if not provided
-if [ -z "${WORLD_SEED}" ]; then
+if [[ -z "${WORLD_SEED}" ]]; then
   WORLD_SEED=$((RANDOM * 10000000 + RANDOM))
   export WORLD_SEED
-  echo "WORLD_SEED is not set, generating a random seed: $WORLD_SEED"
+  echo "WORLD_SEED is not set, generating a random seed: ${WORLD_SEED}"
 fi
 
-if ! envsubst < "$TEMPLATE_FILE" > "$CONFIG_FOLDER/$CONFIG_FILE"; then
+if ! envsubst < "${TEMPLATE_FILE}" > "${CONFIG_FOLDER}/${CONFIG_FILE:?}"; then
   echo "Error: Failed to generate server configuration file." >&2
   exit 1
 fi
 
-echo "Server configuration file generated: $CONFIG_FOLDER/$CONFIG_FILE"
+echo "Server configuration file generated: ${CONFIG_FOLDER}/${CONFIG_FILE}"
