@@ -36,4 +36,5 @@ RUN mv /tmp-downloads/*/Linux/* /terraria-server \
   && chmod +x ./TerrariaServer \
   && chmod +x -R ./scripts
 
-CMD [ "sh", "./scripts/entrypoint.sh" ]
+ENTRYPOINT [ "/bin/bash", "./scripts/entrypoint.sh" ]
+CMD []

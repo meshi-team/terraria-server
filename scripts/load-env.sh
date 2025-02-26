@@ -27,8 +27,8 @@ export WORLD_SEED="${WORLD_SEED:-""}"
 
 # --- Game settings ---
 export DIFFICULTY="${DIFFICULTY:-0}" # 0: (classic) # 1: (expert) # 2: (master) # 3: (journey)
-export MAX_PLAYERS="${MAX_PLAYERS:-15}"
-export PORT="${PORT:-1234}"
+export MAX_PLAYERS="${MAX_PLAYERS:-8}"
+export PORT="${PORT:-7777}"
 export PASSWORD="${PASSWORD:-password}"
 export MOTD="${MOTD:-"Welcome to my server!"}"
 export BANLIST_FILE="${BANLIST_FILE:-/terraria-server/banlist.txt}"
@@ -38,6 +38,7 @@ export UPNP="${UPNP:-1}"
 export NPC_STREAM="${NPC_STREAM:-60}"
 export PRIORITY="${PRIORITY:-1}"
 export SLOW_LIQUIDS="${SLOW_LIQUIDS:-1}"
+export ENABLE_STEAM="${ENABLE_STEAM:-0}"
 
 # --- Journey mode power permissions ---
 # 0: Locked for everyone
