@@ -19,7 +19,6 @@ export LOGS_FILE="${LOGS_FILE:-terraria-server.log}"
 
 # --- World settings ---
 export WORLD_NAME="${WORLD_NAME:-world}"
-export WORLD="${WORLD:-/terraria-server/worlds/world.wld}"
 export WORLD_SIZE="${WORLD_SIZE:-1}"
 export WORLD_ROLLBACKS_TO_KEEP="${WORLD_ROLLBACKS_TO_KEEP:-2}"
 export WORLDS_FOLDER="${WORLDS_FOLDER:-/terraria-server/worlds}"
