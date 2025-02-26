@@ -13,6 +13,7 @@ DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 
 ENV_SCRIPT="${DIR}/load-env.sh"
 CONFIG_SCRIPT="${DIR}/generate-server-config.sh"
+SERVER_INIT_SCRIPT="${DIR}/start-server.sh"
 
 # Source the environment loading script
 if [[ -f "${ENV_SCRIPT}" ]]; then
@@ -39,7 +40,8 @@ mkdir -p "${LOGS_FOLDER}"
 touch "${LOGS_FILE}"
 touch "${BANLIST_FILE}"
 
-# Start the Terraria server
-exec "${SERVER_FOLDER}/${SERVER_BIN}" \
-  -config "${CONFIG_FOLDER}/${CONFIG_FILE}" \
-  -logpath "${LOGS_FOLDER}/${LOGS_FOLDER}"
+if [[ $# -eq 0 ]]; then
+  exec "${SERVER_INIT_SCRIPT}"
+fi
+
+exec "$@"
