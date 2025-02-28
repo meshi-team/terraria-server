@@ -10,9 +10,8 @@ The server:
 - Includes password protection options
 - Preserves world data between container restarts
 
-## Index
+## Table of contents
 
-- [Index](#index)
 - [Requirements](#requirements)
 - [How to Run](#how-to-run)
   - [Quick Start](#quick-start)
@@ -34,8 +33,6 @@ The server:
   - [Contributing](#contributing)
   - [Workflow Tools](#workflow-tools)
 
----
-
 ## Requirements
 
 - **Docker**: [Installation guide](https://docs.docker.com/get-docker/)
@@ -50,31 +47,31 @@ The server:
 1. **Clone this repository**:
 
    ```bash
-   git clone https://github.com/your-org/terraria-server.git
+   git clone https://github.com/meshi-team/terraria-server.git
    cd terraria-server
    ```
 
 2. **Start the server**:
 
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
 3. **View server logs**:
 
    ```bash
-   docker-compose logs -f
+   docker compose logs -f
    ```
 
 4. **Stop the server**:
 
    ```bash
-   docker-compose down
+   docker compose down
    ```
 
 ### Configuration
 
-Edit the docker-compose.yml file to customize your server:
+Edit the `docker-compose.yml` file to customize your server:
 
 ```yaml
 environment:
@@ -89,8 +86,8 @@ environment:
 After changing configuration, restart the server:
 
 ```bash
-docker-compose down
-docker-compose up -d
+docker compose down
+docker compose up -d
 ```
 
 ### Environment Variables
