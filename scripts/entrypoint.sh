@@ -34,7 +34,6 @@ else
 fi
 
 # Create necessary directories
-mkdir -p "${WORLDS_FOLDER}"
 mkdir -p "${LOGS_FOLDER}"
 
 touch "${LOGS_FILE}"

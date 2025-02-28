@@ -21,8 +21,11 @@ export LOGS_FILE="${LOGS_FILE:-terraria-server.log}"
 export WORLD_NAME="${WORLD_NAME:-world}"
 export WORLD_SIZE="${WORLD_SIZE:-1}"
 export WORLD_ROLLBACKS_TO_KEEP="${WORLD_ROLLBACKS_TO_KEEP:-2}"
-export WORLDS_FOLDER="${WORLDS_FOLDER:-/terraria-server/worlds}"
 export WORLD_SEED="${WORLD_SEED:-""}"
+
+# This variable is not configurable, as it is used as a volume
+# to store the world files.
+export WORLDS_FOLDER="/terraria-server/worlds"
 
 # --- Game settings ---
 export DIFFICULTY="${DIFFICULTY:-0}" # 0: (classic) # 1: (expert) # 2: (master) # 3: (journey)
