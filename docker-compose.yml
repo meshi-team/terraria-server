@@ -1,23 +1,24 @@
-name: terraria-server
-
 services:
-  devcontainer:
-    image: terraria-server-devcontainer
-    container_name: terraria-server-devcontainer
+  terraria-server:
     build:
       context: .
-      dockerfile: .devcontainer/Dockerfile
-    # Change the init command so that the container doesn't exit
-    entrypoint: /usr/local/share/docker-init.sh
-    command: sleep infinity
+      dockerfile: server/vanilla/1.4.4.9/Dockerfile
+    container_name: terraria-server
+    ports:
+      - 7777:7777 # Default Terraria server port
+    environment:
+      - WORLD_NAME=world
+      - WORLD_SIZE=2 # 1=small, 2=medium, 3=large
+      - WORLD_SEED=
+      - PASSWORD=
+      - DIFFICULTY=0 # 0=normal, 1=expert, 2=master, 3=journey
+      - MAX_PLAYERS=8
     volumes:
-      # Mount the Docker daemon socket so the devcontainer can run Docker commands
-      - /var/run/docker.sock:/var/run/docker-host.sock
-      # Mount the project directory as the working directory
-      - ${LOCAL_WORKSPACE_FOLDER:-.}:${CONTAINER_WORKSPACE_FOLDER:-/workspaces/terraria-server}
-      # Mount a volume for node_modules
-      - devcontainer-node_modules:${CONTAINER_WORKSPACE_FOLDER:-/workspaces/terraria-server}/node_modules
+      - terraria-server-worlds:/terraria-server/worlds
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
 
 volumes:
-  devcontainer-node_modules:
-    name: terraria-server-devcontainer-node_modules
+  terraria-server-worlds:
+    driver: local
