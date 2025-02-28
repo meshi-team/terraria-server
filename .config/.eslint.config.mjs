@@ -11,6 +11,6 @@ export default [
   },
   // Ignored files.
   {
-    ignores: ["**/node_modules", "**/.terraform"],
+    ignores: ["**/node_modules"],
   },
 ];

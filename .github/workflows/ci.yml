@@ -96,7 +96,6 @@ jobs:
     permissions:
       contents: read
     outputs:
-      terraform: ${{ contains(steps.check.outputs.modified_keys, 'terraform') }}
       hadolint: ${{ contains(steps.check.outputs.modified_keys, 'hadolint') }}
       yamllint: ${{ contains(steps.check.outputs.modified_keys, 'yamllint') }}
       shellcheck: ${{ contains(steps.check.outputs.modified_keys, 'shellcheck') }}
@@ -121,9 +120,6 @@ jobs:
         uses: tj-actions/changed-files@v45
         with:
           files_yaml: |
-            terraform:
-              - "**/*.tf"
-              - "**/*.hcl"
             hadolint:
               - "./.config/.hadolint.yml"
               - "**/Dockerfile"
@@ -153,43 +149,25 @@ jobs:
               - "**/*.mjs"
               - "**/*.cjs"
 
-  # Run terraform fmt on the Terraform files.
-  # -> Fails if there are any formatting issues.
-  tf-fmt:
-    name: Terraform format check
+  # Run yamllint on all YAML files.
+  # -> Fails if there are any linting issues.
+  yamllint:
+    name: Lint YAML
     runs-on: ubuntu-latest
     permissions:
       contents: read
     needs:
       - files-changed
-    if: ${{ needs.files-changed.outputs.terraform == 'true' }}
+    if: ${{ needs.files-changed.outputs.yamllint == 'true' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run terraform fmt
-        shell: bash
-        working-directory: ./infrastructure
-        run: terraform fmt -check -recursive -diff -no-color
-
-  # Run terraform validate on the Terraform files.
-  # -> Fails if there are any validation issues.
-  tf-validate:
-    name: Terraform validate
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    needs:
-      - files-changed
-    if: ${{ needs.files-changed.outputs.terraform == 'true' }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run terraform validate
-        shell: bash
-        working-directory: ./infrastructure
-        run: terraform validate -no-color
+      - name: Run yamllint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          config_file: ./.config/.yamllint.yml
+          strict: true
 
   # Run hadolint on all Dockerfiles.
   # -> Fails if there are any linting issues.
@@ -211,26 +189,6 @@ jobs:
           config: ./.config/.hadolint.yml
           dockerfile: "**/Dockerfile"
           recursive: true
-
-  # Run yamllint on all YAML files.
-  # -> Fails if there are any linting issues.
-  yamllint:
-    name: Lint YAML
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    needs:
-      - files-changed
-    if: ${{ needs.files-changed.outputs.yamllint == 'true' }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run yamllint
-        uses: ibiqlik/action-yamllint@v3
-        with:
-          config_file: ./.config/.yamllint.yml
-          strict: true
 
   # Run shellcheck on all shell scripts.
   # -> Fails if there are any linting issues.
@@ -340,8 +298,6 @@ jobs:
       contents: read
     needs:
       - validate-pr-title
-      - tf-fmt
-      - tf-validate
       - yamllint
       - hadolint
       - shellcheck
