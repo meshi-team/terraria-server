@@ -219,15 +219,19 @@ The DevContainer includes all necessary development tools:
 
 ```bash
 .
-├── .config/              # Configuration files for linting and formatting
-├── .devcontainer/        # VS Code DevContainer configuration
-├── .github/              # GitHub Actions workflows
-├── config/               # Terraria server configuration
-│       └── 1.4.4.9/      # Terraria version-specific Dockerfile # Template for server config
-└── docker-compose.yml    # Local server configuration
-├── scripts/              # Shell scripts for server management
-├── server/               # Dockerfiles for Terraria server
-│   └── vanilla/
+├── .config/               # Configuration for linting and formatting
+├── .devcontainer/         # VS Code DevContainer configuration
+├── .github/               # GitHub Actions workflows
+├── config/                # Terraria server configuration
+│   ├── config-template.cfg  # Server configuration template
+├── infrastructure/        # Project infrastructure
+├── node_modules/          # Node.js dependencies (ignored by Git)
+├── scripts/               # Server management scripts
+├── server/                # Terraria server files
+│   └── vanilla/1.4.4.9/   # Dockerfile for the specific server version
+│       └── Dockerfile
+├── docker-compose.yml     # Docker Compose configuration for the server
+└── README.md              # Project documentation
 ```
 
 ### Contributing
