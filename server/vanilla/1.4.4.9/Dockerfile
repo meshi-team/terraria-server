@@ -15,6 +15,11 @@ RUN apt-get update \
 # Create a directory for the server
 RUN mkdir /terraria-server
 
+# Define persistent volume for Terraria world data
+# Note: If modifying this path, also update ./scripts/load-env.sh
+# This ensures world files persist across container restarts
+VOLUME /terraria-server/worlds
+
 # Download and extract the server
 ENV DOWNLOAD_LINK=https://terraria.org/api/download/pc-dedicated-server/terraria-server-1449.zip
 
