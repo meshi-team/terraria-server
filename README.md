@@ -243,7 +243,7 @@ The DevContainer includes all necessary development tools:
 4. Run linting and formatting checks before committing
 5. Submit a pull request with a conventional commit title:
    - Format: `<type>(<scope>): <subject>`
-   - Valid types: `feat`, `fix`, `refactor`, `revert`, `chore`, `ci`, `docs`
+   - Valid types: `feat`, `fix`, `perf`, `refactor`, `revert`, `chore`, `ci`, `docs`
 6. Ensure all CI checks pass
 
 ### Workflow Tools

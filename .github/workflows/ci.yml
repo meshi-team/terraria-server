@@ -49,6 +49,7 @@ jobs:
           types: |
             feat
             fix
+            perf
             refactor
             revert
             chore
