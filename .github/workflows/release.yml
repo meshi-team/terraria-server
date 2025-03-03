@@ -18,6 +18,11 @@ jobs:
           app-id: ${{ vars.MESHI_TEAM_BOT_APP_ID }}
           private-key: ${{ secrets.MESHI_TEAM_BOT_PRIVATE_KEY }}
 
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.token.outputs.token }}
+
       - name: Build Changelog
         id: build-changelog
         uses: mikepenz/release-changelog-builder-action@v5
