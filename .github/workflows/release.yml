@@ -32,6 +32,13 @@ jobs:
           failOnError: true
           token: ${{ steps.token.outputs.token }}
 
+      - name: Echo changelog
+        shell: bash
+        run: |
+          echo "${{ steps.build-changelog.outputs.changelog }}"
+          echo "${{ steps.build-changelog.outputs.fromTag }}"
+          echo "${{ steps.build-changelog.outputs.toTag }}"
+
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
