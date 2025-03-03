@@ -28,7 +28,7 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v5
         with:
           mode: COMMIT
-          configuration: .github/release_changelog_config.yml
+          configuration: .github/release_changelog_config.json
           failOnError: true
           token: ${{ steps.token.outputs.token }}
 
