@@ -1,5 +1,9 @@
 # Terraria Server 🍕
 
+[![CI status](https://img.shields.io/github/actions/workflow/status/meshi-team/terraria-server/ci.yml?branch=main&event=push&style=flat&label=CI&color=00642E)](https://github.com/meshi-team/terraria-server/actions/workflows/ci.yml?query=branch%3Amain)
+[![Current version](https://img.shields.io/github/v/release/meshi-team/terraria-server?sort=semver&style=flat&label=Version&color=00BAB3)](https://github.com/meshi-team/terraria-server/releases/latest)
+[![Bump version button](https://img.shields.io/badge/Bump_version-4200C8?style=flat)](https://github.com/meshi-team/terraria-server/actions/workflows/bump-version.yml)
+
 A Docker-based Terraria server setup that lets you quickly deploy and manage a Terraria multiplayer server. This repository provides a fully containerized Terraria server that's easy to configure and run on any system that supports Docker. It uses the official Terraria server application, wrapped in a Docker container for consistency and portability.
 
 The server:
