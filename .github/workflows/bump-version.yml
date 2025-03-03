@@ -1,0 +1,111 @@
+name: Bump version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version-increment:
+        description: Version increment type
+        required: true
+        type: choice
+        default: patch
+        options:
+          - major
+          - minor
+          - patch
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'main' }}
+    permissions:
+      contents: read
+    steps:
+      - name: Create meshi-team-bot[bot] token
+        uses: actions/create-github-app-token@v1
+        id: token
+        with:
+          app-id: ${{ vars.MESHI_TEAM_BOT_APP_ID }}
+          private-key: ${{ secrets.MESHI_TEAM_BOT_PRIVATE_KEY }}
+
+      - name: Get role of the user who triggered the workflow
+        id: user-role
+        shell: bash
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+        run: |
+          ROLE=$( \
+            gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/${{ github.repository }}/collaborators/${{ github.actor }}/permission |
+            jq -r '.role_name'
+          )
+
+          echo "role=$ROLE" >> $GITHUB_OUTPUT
+
+      - name: Fail if the user's role is not 'admin' or 'maintain'
+        if: ${{ steps.user-role.outputs.role != 'admin' && steps.user-role.outputs.role != 'maintain' }}
+        shell: bash
+        run: exit 1
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.token.outputs.token }}
+
+      - name: Get latest version tag
+        id: latest-version
+        shell: bash
+        run: |
+          git fetch --tags --force
+          TAG=$(
+            git tag -l "v*" |
+            grep -E "^v[0-9]+\.[0-9]+\.[0-9]+$" |
+            sort -Vr |
+            head -n1 || echo ""
+          )
+
+          if [[ -z "$TAG" ]]; then
+            TAG="v0.0.0"
+          fi
+
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Bump version tag
+        id: bump-version
+        shell: bash
+        run: |
+          version=$(
+            echo "${{ steps.latest-version.outputs.tag }}" |
+            sed "s/v//"
+          )
+          IFS="." read -r -a version <<< "$version"
+
+          major="${version[0]}"
+          minor="${version[1]}"
+          patch="${version[2]}"
+
+          if [[ "${{ inputs.version-increment }}" == "major" ]]; then
+            major=$((major + 1))
+            minor=0
+            patch=0
+          elif [[ "${{ inputs.version-increment }}" == "minor" ]]; then
+            minor=$((minor + 1))
+            patch=0
+          else
+            patch=$((patch + 1))
+          fi
+
+          echo "tag=v${major}.${minor}.${patch}" >> $GITHUB_OUTPUT
+
+      - name: Push the new version tag
+        shell: bash
+        run: |
+          git tag \
+            "${{ steps.bump-version.outputs.tag }}" \
+            "${{ github.sha }}" \
+            --force
+
+          git push origin \
+            "${{ steps.bump-version.outputs.tag }}" \
+          --force
