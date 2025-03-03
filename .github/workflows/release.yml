@@ -1,0 +1,39 @@
+name: Create release
+
+on:
+  push:
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'main' }}
+    permissions:
+      contents: read
+    steps:
+      - name: Create meshi-team-bot[bot] token
+        uses: actions/create-github-app-token@v1
+        id: token
+        with:
+          app-id: ${{ vars.MESHI_TEAM_BOT_APP_ID }}
+          private-key: ${{ secrets.MESHI_TEAM_BOT_PRIVATE_KEY }}
+
+      - name: Build Changelog
+        id: build-changelog
+        uses: mikepenz/release-changelog-builder-action@v5
+        with:
+          mode: COMMIT
+          configuration: .github/release_changelog_config.yml
+          failOnError: true
+          token: ${{ steps.token.outputs.token }}
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: ${{ steps.build-changelog.outputs.changelog }}
+          generate_release_notes: false
+          draft: false
+          prerelease: false
+          make_latest: true
+          token: ${{ steps.token.outputs.token }}

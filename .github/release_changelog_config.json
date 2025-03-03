@@ -1,0 +1,27 @@
+{
+  "template": "#{{CHANGELOG}}",
+  "categories": [
+    {
+      "title": "## 🎉 Features",
+      "labels": ["feat"]
+    },
+    {
+      "title": "## 🔧 Bug Fixes and Performance Improvements",
+      "labels": ["fix", "perf"]
+    },
+    {
+      "title": "## 🧹 Maintenance",
+      "labels": ["refactor", "revert", "chore", "ci", "docs"]
+    },
+    {
+      "title": "## Other",
+      "labels": []
+    }
+  ],
+  "label_extractor": [
+    {
+      "pattern": "^(feat|fix|perf|refactor|revert|chore|ci|docs){1}(\\([\\w\\-\\.]+\\))?(!)?: ([\\w ])+([\\s\\S]*)",
+      "target": "$1"
+    }
+  ]
+}

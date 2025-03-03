@@ -109,11 +109,3 @@ jobs:
           git push origin \
             "${{ steps.bump-version.outputs.tag }}" \
           --force
-
-      - name: Create release
-        shell: bash
-        run: |
-          gh release create \
-            "${{ steps.bump-version.outputs.tag }}" \
-            --title "${{ steps.bump-version.outputs.tag }}" \
-            --notes "Release ${{ steps.bump-version.outputs.tag }}"
