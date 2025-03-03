@@ -28,9 +28,16 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v5
         with:
           mode: COMMIT
-          configuration: .github/release_changelog_config.yml
+          configuration: .github/release_changelog_config.json
           failOnError: true
           token: ${{ steps.token.outputs.token }}
+
+      - name: Echo changelog
+        shell: bash
+        run: |
+          echo "${{ steps.build-changelog.outputs.changelog }}"
+          echo "${{ steps.build-changelog.outputs.fromTag }}"
+          echo "${{ steps.build-changelog.outputs.toTag }}"
 
       - name: Create release
         uses: softprops/action-gh-release@v2
