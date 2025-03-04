@@ -1,9 +1,8 @@
 services:
-  terraria-server:
+  vanilla-server:
     build:
-      context: .
-      dockerfile: server/vanilla/1.4.4.9/Dockerfile
-    container_name: terraria-server
+      context: server/vanilla/.
+    container_name: vanilla-server
     ports:
       - 7777:7777 # Default Terraria server port
     environment:
@@ -14,11 +13,12 @@ services:
       - DIFFICULTY=0 # 0=normal, 1=expert, 2=master, 3=journey
       - MAX_PLAYERS=8
     volumes:
-      - terraria-server-worlds:/terraria-server/worlds
+      - vanilla-worlds:/terraria-server/worlds
+    profiles: [vanilla]
     restart: unless-stopped
     tty: true
     stdin_open: true
 
 volumes:
-  terraria-server-worlds:
+  vanilla-worlds:
     driver: local

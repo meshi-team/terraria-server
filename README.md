@@ -19,6 +19,7 @@ The server:
 - [Requirements](#requirements)
 - [How to Run](#how-to-run)
   - [Quick Start](#quick-start)
+  - [Server Profiles](#server-profiles)
   - [Configuration](#configuration)
   - [Environment Variables](#environment-variables)
   - [Init Settings](#init-settings)
@@ -55,10 +56,17 @@ The server:
    cd terraria-server
    ```
 
-2. **Start the server**:
+2. **Start the server with a specific profile**:
 
    ```bash
-   docker compose up -d
+   # Start the vanilla Terraria server
+   docker compose --profile vanilla up -d
+
+   # Coming soon - TShock server
+   # docker compose --profile tshock up -d
+
+   # Coming soon - Mobile compatible server
+   # docker compose --profile mobile up -d
    ```
 
 3. **View server logs**:
@@ -72,6 +80,17 @@ The server:
    ```bash
    docker compose down
    ```
+
+### Server Profiles
+
+Currently available profiles:
+
+- **vanilla**: The official Terraria server - [version](./server/vanilla/terraria-version)
+
+Coming soon:
+
+- **tshock**: TShock server with advanced moderation tools and plugin support
+- **mobile**: Server compatible with Terraria mobile clients
 
 ### Configuration
 
