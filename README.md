@@ -85,7 +85,7 @@ The server:
 
 Currently available profiles:
 
-- **vanilla**: The official Terraria server (version 1.4.4.9)
+- **vanilla**: The official Terraria server
 
 Coming soon:
 
