@@ -1,0 +1,53 @@
+name: Build Terraria Docker Images
+
+env:
+  REPOSITORY_PREFIX: meshi-team/terraria-server
+  SERVER_PATH: server
+
+on:
+  push:
+    branches:
+      - feat/image-build-workflow
+    paths:
+      - server/**/*
+
+jobs:
+  detect-image-types:
+    runs-on: ubuntu-latest
+    outputs:
+      changed_image_types: ${{ steps.detect-images-changes.outputs.changed_image_types }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List Changed Server Folders
+        id: detect-images-changes
+        uses: ./.github/actions/detect-images-changes
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          server_path: ${{ env.SERVER_PATH }}
+
+  build-images:
+    needs: detect-image-types
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        type: ${{ fromJSON(needs.detect-image-types.outputs.changed_image_types) }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Server Image
+        uses: ./.github/actions/build-images
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          server-type: ${{ matrix.type }}
+          build-directory: ${{ env.SERVER_PATH }}/${{ matrix.type }}
+          repository-prefix: ${{ env.REPOSITORY_PREFIX }}
