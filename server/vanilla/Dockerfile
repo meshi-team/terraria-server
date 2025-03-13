@@ -1,5 +1,32 @@
 FROM mono:slim
 
+# Build-time arguments for dynamic labels
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+
+# New labels following OCI Image Spec
+LABEL org.opencontainers.image.created=${BUILD_DATE}
+LABEL org.opencontainers.image.version=${VERSION}
+LABEL org.opencontainers.image.revision=${VCS_REF}
+LABEL org.opencontainers.image.title="Terraria Server Vanilla"
+LABEL org.opencontainers.image.url="https://github.com/meshi-team/terraria-server"
+LABEL org.opencontainers.image.documentation="https://github.com/meshi-team/terraria-server"
+LABEL org.opencontainers.image.vendor="Meshi Team"
+
+# Additional helpful labels
+LABEL com.terraria.version="1.4.4.9"
+LABEL io.github.meshi-team.terraria-server.maintainer="Meshi Team"
+LABEL io.github.meshi-team.terraria-server.is-production="true"
+
+LABEL org.opencontainers.image.description="Terraria dedicated server (v1.4.4.9) container image \
+with persistent world storage and customizable configuration. \
+This containerized server allows for easy deployment of multiplayer Terraria worlds \
+with cross-architecture support (linux/amd64, linux/arm64, linux/arm/v7). \
+Built on mono:slim with minimal dependencies for optimal performance."
+LABEL org.opencontainers.image.source="https://github.com/meshi-team/terraria-server"
+LABEL org.opencontainers.image.licenses="MIT"
+
 # Install dependencies
 RUN apt-get update \
   && apt-get upgrade -y \
