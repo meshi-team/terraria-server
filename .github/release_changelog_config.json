@@ -12,10 +12,6 @@
     {
       "title": "## 🧹 Maintenance",
       "labels": ["refactor", "revert", "chore", "ci", "docs"]
-    },
-    {
-      "title": "## Other",
-      "labels": []
     }
   ],
   "label_extractor": [
