@@ -1,0 +1,93 @@
+name: Build Terraria Docker Images
+
+env:
+  BUILD_CONTEXTS_PATH: server
+
+on:
+  push:
+    branches:
+      - feat/image-build-workflow
+
+jobs:
+  check-commit-message:
+    runs-on: ubuntu-latest
+    outputs:
+      should-build: ${{ steps.check-commit.outputs.should-build }}
+    steps:
+      - name: Check commit message
+        id: check-commit
+        shell: bash
+        run: |
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          if [[ "$COMMIT_MSG" =~ ^build(\(.*\))?:[[:space:]]+ ]]; then
+            echo "should-build=true" >> $GITHUB_OUTPUT
+            echo "Build trigger found in commit message"
+          else
+            echo "should-build=false" >> $GITHUB_OUTPUT
+            echo "No build trigger in commit message"
+          fi
+
+  detect-image-types:
+    if: ${{ needs.check-commit-message.outputs.should-build == 'true' }}
+    needs:
+      - check-commit-message
+    runs-on: ubuntu-latest
+    outputs:
+      changed-image-types: ${{ steps.detect-images-changes.outputs.changed-image-types }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List Changed Server Folders
+        id: detect-images-changes
+        uses: ./.github/actions/detect-images-changes
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          server-path: ${{ env.BUILD_CONTEXTS_PATH }}
+
+  build-images:
+    needs:
+      - detect-image-types
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        type: ${{ fromJSON(needs.detect-image-types.outputs.changed-image-types) }}
+    steps:
+      - name: Create meshi-team-bot[bot] token
+        uses: actions/create-github-app-token@v1
+        id: bot-token
+        with:
+          app-id: ${{ vars.MESHI_TEAM_BOT_APP_ID }}
+          private-key: ${{ secrets.MESHI_TEAM_BOT_PRIVATE_KEY }}
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.bot-token.outputs.token }}
+
+      - name: Build Server Image
+        id: build-image
+        uses: ./.github/actions/build-images
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          server-type: ${{ matrix.type }}
+          build-directory: ${{ env.BUILD_CONTEXTS_PATH }}/${{ matrix.type }}
+          repository-prefix: ${{ github.repository }}
+
+      - name: Create Tag
+        id: create-tag
+        shell: bash
+        run: |
+          git tag \
+            "${{ matrix.type }}-v${{ steps.build-image.outputs.image-tag }}" \
+            "${{ github.sha }}" \
+            --force
+
+          git push origin \
+            "${{ matrix.type }}-v${{ steps.build-image.outputs.image-tag }}" \
+          --force
