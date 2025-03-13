@@ -1,5 +1,7 @@
 FROM mono:slim
 
+LABEL maintainer="Terraria Server Docker Maintainers"
+
 # Install dependencies
 RUN apt-get update \
   && apt-get upgrade -y \
