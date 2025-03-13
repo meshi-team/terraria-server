@@ -55,6 +55,7 @@ jobs:
             chore
             ci
             docs
+            build
           requireScope: false
           subjectPattern: ^[a-z].+$
 

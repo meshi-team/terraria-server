@@ -1,0 +1,36 @@
+name: Detect Terraria Image Changes
+inputs:
+  token:
+    required: true
+    description: Pre-generated token for registry authentication
+  server-path:
+    default: .
+    description: Base path for Terraria server image directories
+
+outputs:
+  changed-image-types:
+    description: JSON array of Terraria image types that have been modified
+    value: ${{ steps.image-types.outputs.changed-image-types }}
+
+runs:
+  using: composite
+  steps:
+    - name: Identify Modified Files
+      id: modified-files
+      uses: tj-actions/changed-files@v45
+      with:
+        dir_names_max_depth: 2
+        files: ${{ inputs.server-path }}/**/*
+
+    - name: Process Image Types
+      id: image-types
+      shell: bash
+      run: |
+        # Extract Terraria image type names without path prefix
+        IMAGES=$(echo "${{ steps.modified-files.outputs.all_changed_files }}" \
+          | grep -oE "${{ inputs.server-path }}/[^/]+" \
+          | sed "s|${{ inputs.server-path }}/||" \
+          | sort -u \
+          | jq -R -s -c 'split("\n") | map(select(. != ""))')
+
+        echo "changed-image-types=$IMAGES" >> "$GITHUB_OUTPUT"
