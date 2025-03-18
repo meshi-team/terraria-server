@@ -1,0 +1,95 @@
+name: Build and Push Terraria Server Image
+
+inputs:
+  server-type:
+    required: true
+    description: Type of Terraria server (vanilla, tshock, etc)
+  build-directory:
+    required: true
+    description: Directory containing Dockerfile and build context
+  repository-prefix:
+    required: true
+    description: Prefix for the GHCR repository name
+  token:
+    required: true
+    description: GitHub token for GHCR authentication
+
+outputs:
+  image-tag:
+    description: Tag for the built image
+    value: ${{ steps.generate-image-tag.outputs.image-tag }}
+  package-name:
+    description: Name of the package
+    value: ${{ steps.generate-image-tag.outputs.package-name }}
+
+runs:
+  using: composite
+  steps:
+    - name: Login to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ inputs.token }}
+
+    - name: Install skopeo manually
+      shell: bash
+      run: |
+        sudo apt-get update && sudo apt-get install -y skopeo
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Read Terraria Version
+      id: read-version
+      shell: bash
+      run: |
+        VERSION=$(cat "${{ inputs.build-directory }}/terraria-version")
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Generate Image Tag
+      id: generate-image-tag
+      shell: bash
+      run: |
+        # Read version sequence from JSON file
+        readarray -t AVAILABLE_TAGS < <(jq -r '.[]' ./.github/image_versions.json)
+
+        PKG_NAME="${{ inputs.repository-prefix }}-${{ inputs.server-type }}"
+        echo "package-name=$PKG_NAME" >> $GITHUB_OUTPUT
+
+        EXISTING_TAGS=$(skopeo list-tags docker://ghcr.io/$PKG_NAME \
+          --creds "${{ github.actor }}:${{ inputs.token }}" \
+          | jq -r '.Tags[]' 2>/dev/null || echo "")
+
+        NEXT_TAG="${AVAILABLE_TAGS[0]}"  # Default to first element
+        for tag in "${AVAILABLE_TAGS[@]}"; do
+          if ! echo "$EXISTING_TAGS" | grep -qw "$tag"; then
+            NEXT_TAG="$tag"
+            break
+          fi
+        done
+
+        echo "image-tag=${{ steps.read-version.outputs.version }}-$NEXT_TAG" >> $GITHUB_OUTPUT
+
+    - name: Get current timestamp
+      id: timestamp
+      shell: bash
+      run: echo "build_date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
+    - name: Build and Push Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ${{ inputs.build-directory }}
+        platforms: linux/amd64,linux/arm64,linux/arm/v7
+        tags: |
+          ghcr.io/${{ steps.generate-image-tag.outputs.package-name }}:${{ steps.generate-image-tag.outputs.image-tag }}
+          ghcr.io/${{ steps.generate-image-tag.outputs.package-name }}:latest
+        push: true
+        build-args: |
+          VCS_REF=${{ github.sha }}
+          BUILD_DATE=${{ steps.timestamp.outputs.build_date }}
+          VERSION=${{ steps.generate-image-tag.outputs.image-tag }}
+          DOCS=${{ inputs.build-directory }}/README.md
