@@ -74,6 +74,11 @@ runs:
 
         echo "image-tag=${{ steps.read-version.outputs.version }}-$NEXT_TAG" >> $GITHUB_OUTPUT
 
+    - name: Get current timestamp
+      id: timestamp
+      shell: bash
+      run: echo "build_date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
     - name: Build and Push Image
       uses: docker/build-push-action@v5
       with:
@@ -83,3 +88,8 @@ runs:
           ghcr.io/${{ steps.generate-image-tag.outputs.package-name }}:${{ steps.generate-image-tag.outputs.image-tag }}
           ghcr.io/${{ steps.generate-image-tag.outputs.package-name }}:latest
         push: true
+        build-args: |
+          VCS_REF=${{ github.sha }}
+          BUILD_DATE=${{ steps.timestamp.outputs.build_date }}
+          VERSION=${{ steps.generate-image-tag.outputs.image-tag }}
+          DOCS=${{ inputs.build-directory }}/README.md
