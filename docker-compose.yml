@@ -2,6 +2,8 @@ services:
   vanilla-server:
     build:
       context: server/vanilla/.
+    # Use the line below instead of the build context if you want to use the pre-built image
+    # image: ghcr.io/meshi-team/terraria-server-vanilla:latest
     container_name: vanilla-server
     ports:
       - 7777:7777 # Default Terraria server port
