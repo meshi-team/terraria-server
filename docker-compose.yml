@@ -21,6 +21,31 @@ services:
     tty: true
     stdin_open: true
 
+  mobile-server:
+    build:
+      context: server/mobile/.
+    # Use the line below instead of the build context if you want to use the pre-built image
+    # image: ghcr.io/meshi-team/terraria-server-mobile:latest
+    container_name: mobile-server
+    ports:
+      - 7777:7777/udp
+      - 7777:7777/tcp
+    environment:
+      - WORLD_NAME=world
+      - WORLD_SIZE=1 # 1=small, 2=medium, 3=large
+      - WORLD_SEED=
+      - PASSWORD=
+      - DIFFICULTY=0 # 0=normal, 1=expert, 2=master, 3=journey
+      - MAX_PLAYERS=8
+    volumes:
+      - mobile-worlds:/terraria-server/worlds
+    profiles: [mobile]
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+
 volumes:
   vanilla-worlds:
+    driver: local
+  mobile-worlds:
     driver: local

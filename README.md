@@ -8,17 +8,22 @@ A Docker-based Terraria server setup that lets you quickly deploy and manage a T
 
 The server:
 
-- Runs Terraria version 1.4.4.9
+- Runs Terraria version 1.4.4.9 (PC/Vanilla)
 - Supports customizable world generation
 - Allows adjustable difficulty settings
 - Includes password protection options
 - Preserves world data between container restarts
 
+> **Mobile support is now available!**
+> Run a Terraria Mobile Edition server using the new `mobile` profile.
+> See [server/mobile/README.md](./server/mobile/README.md) for details.
+
 ## Table of contents
 
 - [Requirements](#requirements)
 - [How to Run](#how-to-run)
-  - [Quick Start](#quick-start)
+  - [Prebuilt Images](#prebuilt-images)
+  - [From Source](#from-source)
   - [Server Profiles](#server-profiles)
   - [Configuration](#configuration)
   - [Environment Variables](#environment-variables)
@@ -47,7 +52,47 @@ The server:
 
 ## How to Run
 
-### Quick Start
+### Prebuilt Images
+
+You can run the server using prebuilt images from GitHub Container Registry (GHCR) without cloning this repository.
+
+- See [Vanilla server arguments](./server/vanilla/README.md)
+- See [Mobile server arguments](./server/mobile/README.md)
+
+**Vanilla (PC) server:**
+
+```bash
+docker run -d \
+  --name vanilla-server \
+  -p 7777:7777 \
+  -e WORLD_NAME=world \
+  -e WORLD_SIZE=2 \
+  -e DIFFICULTY=0 \
+  -e MAX_PLAYERS=8 \
+  -v vanilla-worlds:/terraria-server/worlds \
+  ghcr.io/meshi-team/terraria-server-vanilla:latest
+```
+
+**Mobile server:**
+
+```bash
+docker run -d \
+  --name mobile-server \
+  -p 7777:7777/udp \
+  -p 7777:7777/tcp \
+  -e WORLD_NAME=world \
+  -e WORLD_SIZE=1 \
+  -e DIFFICULTY=0 \
+  -e MAX_PLAYERS=8 \
+  -v mobile-worlds:/terraria-server/worlds \
+  ghcr.io/meshi-team/terraria-server-mobile:latest
+```
+
+Or use the prebuilt images in your `docker-compose.yml` by replacing the `build:` section with the appropriate `image:` line (see comments in the provided compose file).
+
+### From Source
+
+To build and run the server from source, follow these steps:
 
 1. **Clone this repository**:
 
@@ -59,14 +104,14 @@ The server:
 2. **Start the server with a specific profile**:
 
    ```bash
-   # Start the vanilla Terraria server
+   # Start the vanilla Terraria server (PC)
    docker compose --profile vanilla up -d
+
+   # Start the Terraria Mobile server
+   docker compose --profile mobile up -d
 
    # Coming soon - TShock server
    # docker compose --profile tshock up -d
-
-   # Coming soon - Mobile compatible server
-   # docker compose --profile mobile up -d
    ```
 
 3. **View server logs**:
@@ -85,12 +130,12 @@ The server:
 
 Currently available profiles:
 
-- **vanilla**: The official Terraria server - [version](./server/vanilla/terraria-version) | [documentation](./server/vanilla/README.md)
+- **vanilla**: The official Terraria server (PC) - [version](./server/vanilla/terraria-version) | [documentation](./server/vanilla/README.md)
+- **mobile**: Terraria Mobile Edition server - [version](./server/mobile/terraria-version) | [documentation](./server/mobile/README.md)
 
 Coming soon:
 
 - **tshock**: TShock server with advanced moderation tools and plugin support
-- **mobile**: Server compatible with Terraria mobile clients
 
 ### Configuration
 
@@ -146,7 +191,7 @@ The server can be customized using the following environment variables:
 | DIFFICULTY   | 0                            | Game difficulty (0: classic, 1: expert, 2: master, 3: journey) |
 | MAX_PLAYERS  | 8                            | Maximum number of players allowed                              |
 | PORT         | 7777                         | Server port                                                    |
-| PASSWORD     | password                     | Server password                                                |
+| PASSWORD     |                              | Server password                                                |
 | MOTD         | "Welcome to my server!"      | Message of the day                                             |
 | BANLIST_FILE | /terraria-server/banlist.txt | Path to banlist file                                           |
 | SECURE       | 1                            | Enable secure mode (1: on, 0: off)                             |
@@ -239,20 +284,26 @@ The DevContainer includes all necessary development tools:
 
 ```bash
 .
-├── .config/               # Configuration for linting and formatting
-├── .devcontainer/         # VS Code DevContainer configuration
-├── .github/               # GitHub Actions workflows
-├── config/                # Terraria server configuration
-│   ├── config-template.cfg  # Server configuration template
-├── infrastructure/        # Project infrastructure
-├── node_modules/          # Node.js dependencies (ignored by Git)
-├── scripts/               # Server management scripts
-├── server/                # Terraria server files
-│   └── vanilla/1.4.4.9/   # Dockerfile for the specific server version
-│       └── Dockerfile
-├── docker-compose.yml     # Docker Compose configuration for the server
-└── README.md              # Project documentation
+├── docker-compose.yml
+├── LICENSE
+├── package.json
+├── package-lock.json
+├── README.md
+└── server
+    ├── <server-type>
+    │   ├── config
+    │   │   └── config-template.cfg
+    │   ├── Dockerfile
+    │   ├── README.md
+    │   ├── scripts
+    │   │   ├── entrypoint.sh
+    │   │   ├── generate-server-config.sh
+    │   │   ├── load-env.sh
+    │   │   └── start-server.sh
+    │   └── terraria-version
 ```
+
+Where `<server-type>` is either `vanilla` or `mobile`.
 
 ### Contributing
 
