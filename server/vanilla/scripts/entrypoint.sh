@@ -3,7 +3,7 @@
 # This script initializes the Terraria server by loading environment variables
 # and generating the server configuration file.
 
-# 1. Load environment variables fron the env script
+# 1. Load environment variables from the env script
 # 2. Generate the server configuration file based on the environment variables
 # 3. Start the Terraria server with the generated configuration
 
