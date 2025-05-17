@@ -93,7 +93,7 @@ docker compose up -d
 | DIFFICULTY   | 0                            | Game difficulty (0: classic, 1: expert, 2: master, 3: journey) |
 | MAX_PLAYERS  | 8                            | Maximum number of players allowed                              |
 | PORT         | 7777                         | Server port                                                    |
-| PASSWORD     | password                     | Server password                                                |
+| PASSWORD     |                              | Server password                                                |
 | MOTD         | "Welcome to my server!"      | Message of the day                                             |
 | BANLIST_FILE | /terraria-server/banlist.txt | Path to banlist file                                           |
 | SECURE       | 1                            | Enable secure mode (1: on, 0: off)                             |
