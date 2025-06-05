@@ -44,6 +44,23 @@ services:
     tty: true
     stdin_open: true
 
+  tshock-server:
+    image: ghcr.io/pryaxis/tshock
+    container_name: tshock-server
+    restart: unless-stopped
+    volumes:
+      - ./tshock/:/tshock
+      - ./worlds:/worlds
+      - ./plugins:/plugins
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 7777:7777
+      - 7878:7878
+    command: -world /worlds/my_world.wld
+    profiles: [tshock]
+    tty: true
+    stdin_open: true
+
 volumes:
   vanilla-worlds:
     driver: local

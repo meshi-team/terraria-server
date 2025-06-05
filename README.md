@@ -18,6 +18,10 @@ The server:
 > Run a Terraria Mobile Edition server using the new `mobile` profile.
 > See [server/mobile/README.md](./server/mobile/README.md) for details.
 
+> **TShock support is now available!**
+> Run a TShock-enabled Terraria server using the new `tshock` profile.
+> See the [TShock Wiki](https://github.com/Pryaxis/TShock/wiki) for advanced configuration, plugins, and moderation tools.
+
 ## Table of contents
 
 - [Requirements](#requirements)
@@ -25,6 +29,7 @@ The server:
   - [Prebuilt Images](#prebuilt-images)
   - [From Source](#from-source)
   - [Server Profiles](#server-profiles)
+  - [TShock Server](#tshock-server)
   - [Configuration](#configuration)
   - [Environment Variables](#environment-variables)
   - [Init Settings](#init-settings)
@@ -110,8 +115,8 @@ To build and run the server from source, follow these steps:
    # Start the Terraria Mobile server
    docker compose --profile mobile up -d
 
-   # Coming soon - TShock server
-   # docker compose --profile tshock up -d
+   # Start the TShock server
+   docker compose --profile tshock up -d
    ```
 
 3. **View server logs**:
@@ -132,10 +137,21 @@ Currently available profiles:
 
 - **vanilla**: The official Terraria server (PC) - [version](./server/vanilla/terraria-version) | [documentation](./server/vanilla/README.md)
 - **mobile**: Terraria Mobile Edition server - [version](./server/mobile/terraria-version) | [documentation](./server/mobile/README.md)
-
-Coming soon:
-
 - **tshock**: TShock server with advanced moderation tools and plugin support
+
+### TShock Server
+
+The TShock server provides advanced moderation, REST API, and plugin support for Terraria.  
+To use TShock, start the server with the `tshock` profile:
+
+```bash
+docker compose --profile tshock up -d
+```
+
+TShock data, configuration, and plugins are stored in the `./tshock`, `./worlds`, and `./plugins` directories (mounted as volumes).  
+The REST API is available on port `7878` by default.
+
+For more information, configuration options, and plugin management, see the [TShock Wiki](https://github.com/Pryaxis/TShock/wiki).
 
 ### Configuration
 
