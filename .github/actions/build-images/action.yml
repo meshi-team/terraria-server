@@ -57,6 +57,7 @@ runs:
         # Read version sequence from JSON file
         readarray -t AVAILABLE_TAGS < <(jq -r '.[]' ./.github/image_versions.json)
 
+        VERSION="${{ steps.read-version.outputs.version }}"
         PKG_NAME="${{ inputs.repository-prefix }}-${{ inputs.server-type }}"
         echo "package-name=$PKG_NAME" >> $GITHUB_OUTPUT
 
@@ -64,15 +65,17 @@ runs:
           --creds "${{ github.actor }}:${{ inputs.token }}" \
           | jq -r '.Tags[]' 2>/dev/null || echo "")
 
+        # The sequence restarts for every new Terraria version, so only
+        # tags belonging to the current version count as taken
         NEXT_TAG="${AVAILABLE_TAGS[0]}"  # Default to first element
         for tag in "${AVAILABLE_TAGS[@]}"; do
-          if ! echo "$EXISTING_TAGS" | grep -qw "$tag"; then
+          if ! echo "$EXISTING_TAGS" | grep -qx "${VERSION}-${tag}"; then
             NEXT_TAG="$tag"
             break
           fi
         done
 
-        echo "image-tag=${{ steps.read-version.outputs.version }}-$NEXT_TAG" >> $GITHUB_OUTPUT
+        echo "image-tag=${VERSION}-$NEXT_TAG" >> $GITHUB_OUTPUT
 
     - name: Get current timestamp
       id: timestamp
