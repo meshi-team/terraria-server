@@ -18,6 +18,11 @@ on:
           - all
           - vanilla
           - mobile
+      release:
+        description: Specific Terraria release number to build (e.g. 1450). Leave empty for the latest.
+        required: false
+        type: string
+        default: ""
 
 jobs:
   detect-image-types:
@@ -64,6 +69,15 @@ jobs:
             TYPES="vanilla mobile"
           fi
 
+          RELEASE_OVERRIDE=""
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.release }}" ]]; then
+            RELEASE_OVERRIDE="${{ inputs.release }}"
+            if [[ ! "$RELEASE_OVERRIDE" =~ ^[0-9]+$ ]]; then
+              echo "Invalid release number: '$RELEASE_OVERRIDE' (digits only, e.g. 1456)"
+              exit 1
+            fi
+          fi
+
           MATRIX="[]"
           for type in $TYPES; do
             # On scheduled runs only build releases not yet in the registry
@@ -78,11 +92,22 @@ jobs:
               fi
             fi
 
+            # A pinned older release must not move the "latest" tag backwards
+            VERSION="${FILE_VERSIONS[$type]}"
+            PUSH_LATEST=true
+            if [[ -n "$RELEASE_OVERRIDE" ]]; then
+              VERSION="$RELEASE_OVERRIDE"
+              if [[ "$VERSION" != "${FILE_VERSIONS[$type]}" ]]; then
+                PUSH_LATEST=false
+              fi
+            fi
+
             MATRIX=$(echo "$MATRIX" | jq -c \
               --arg type "$type" \
-              --arg file_version "${FILE_VERSIONS[$type]}" \
+              --arg file_version "$VERSION" \
               --arg channel "${CHANNELS[$type]}" \
-              '. + [{"type": $type, "file-version": $file_version, "channel": $channel}]')
+              --arg push_latest "$PUSH_LATEST" \
+              '. + [{"type": $type, "file-version": $file_version, "channel": $channel, "push-latest": $push_latest}]')
           done
 
           echo "Build matrix: $MATRIX"
@@ -129,6 +154,7 @@ jobs:
           repository-prefix: ${{ github.repository }}
           file-version: ${{ matrix.file-version }}
           download-channel: ${{ matrix.channel }}
+          push-latest: ${{ matrix.push-latest }}
 
       - name: Create Tag
         id: create-tag

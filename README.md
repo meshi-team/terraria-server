@@ -331,6 +331,9 @@ Server images are built and pushed to GHCR automatically by the
 - **Server code changes**: after merging changes under `server/<type>/`,
   dispatch the workflow manually from the Actions tab, selecting which image
   to rebuild. This republishes the image for the current Terraria release.
+- **Specific releases**: the manual dispatch also accepts a release number
+  (e.g. `1450`) to build that exact version. Building a release older than
+  the current one does not move the `latest` tag.
 
 Images are tagged with the Terraria version they run (e.g. `1.4.5.6`), plus a
 moving `latest` tag. Each published image is also recorded as a git tag

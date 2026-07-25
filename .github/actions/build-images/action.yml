@@ -20,6 +20,10 @@ inputs:
   download-channel:
     required: true
     description: terraria.org download channel (pc-dedicated-server or mobile-dedicated-server)
+  push-latest:
+    required: false
+    default: "true"
+    description: Whether to also move the "latest" tag to this image
 
 outputs:
   image-tag:
@@ -55,6 +59,12 @@ runs:
         FIRST_LINE=$(unzip -p /tmp/terraria-release.zip "*/Linux/changelog.txt" | sed -n '1p')
         VERSION=$(grep -oE '[0-9]+(\.[0-9]+)+' <<< "$FIRST_LINE" | sed -n '1p')
 
+        # Re-Logic omits the trailing ".0" in some changelogs (release 1450
+        # says "Version 1.4.5"); normalize so the digits match the filename.
+        if [[ -n "$VERSION" && "${VERSION//./}0" == "${{ inputs.file-version }}" ]]; then
+          VERSION="${VERSION}.0"
+        fi
+
         if [[ -z "$VERSION" || "${VERSION//./}" != "${{ inputs.file-version }}" ]]; then
           echo "Changelog version '$VERSION' does not match release number '${{ inputs.file-version }}'"
           echo "Changelog first line: $FIRST_LINE"
@@ -68,6 +78,19 @@ runs:
       id: timestamp
       shell: bash
       run: echo "build_date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
+    - name: Compose Image Tags
+      id: image-tags
+      shell: bash
+      run: |
+        IMAGE="ghcr.io/${{ inputs.repository-prefix }}-${{ inputs.server-type }}"
+
+        TAGS="$IMAGE:${{ steps.verify-release.outputs.version }}"
+        if [[ "${{ inputs.push-latest }}" == "true" ]]; then
+          TAGS="$TAGS,$IMAGE:latest"
+        fi
+
+        echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
     - name: Build Image for Smoke Test
       uses: docker/build-push-action@v5
@@ -131,9 +154,7 @@ runs:
       with:
         context: ${{ inputs.build-directory }}
         platforms: linux/amd64,linux/arm64,linux/arm/v7
-        tags: |
-          ghcr.io/${{ inputs.repository-prefix }}-${{ inputs.server-type }}:${{ steps.verify-release.outputs.version }}
-          ghcr.io/${{ inputs.repository-prefix }}-${{ inputs.server-type }}:latest
+        tags: ${{ steps.image-tags.outputs.tags }}
         push: true
         cache-from: type=gha,scope=${{ inputs.server-type }}
         build-args: |
