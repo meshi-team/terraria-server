@@ -1,5 +1,7 @@
 FROM mono:slim
 
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 # Build-time arguments for dynamic labels
 ARG BUILD_DATE
 ARG VCS_REF
@@ -24,8 +26,12 @@ LABEL org.opencontainers.image.description="Terraria dedicated server (v$VERSION
 LABEL org.opencontainers.image.source="https://github.com/meshi-team/terraria-server"
 LABEL org.opencontainers.image.licenses="MIT"
 
-# Install dependencies
-RUN apt-get update \
+# Install dependencies.
+# mono:slim is based on Debian Buster, which reached end-of-life: its
+# packages are now only served from archive.debian.org, whose Release
+# files are frozen (hence the disabled Check-Valid-Until).
+RUN printf 'deb http://archive.debian.org/debian buster main\ndeb http://archive.debian.org/debian-security buster/updates main\n' > /etc/apt/sources.list \
+  && apt-get -o Acquire::Check-Valid-Until=false update \
   && apt-get upgrade -y \
   && apt-get install --no-install-recommends -y curl \
   && apt-get install --no-install-recommends -y nuget \
@@ -44,10 +50,23 @@ RUN mkdir /terraria-server
 # This ensures world files persist across container restarts
 VOLUME /terraria-server/worlds
 
-# Download and extract the server
-ENV DOWNLOAD_LINK=https://terraria.org/api/download/pc-dedicated-server/terraria-server-1449.zip
+# Download and extract the server.
+# TERRARIA_FILE_VERSION is the release number as it appears in the official
+# download filename (e.g. 1456 for 1.4.5.6). When empty, the latest release
+# is resolved from the terraria.org versions endpoint (first entry = PC).
+# Note: the resolved version is frozen in the Docker layer cache; pass an
+# explicit TERRARIA_FILE_VERSION or build with --no-cache to force a refresh.
+ARG TERRARIA_FILE_VERSION=""
 
-RUN curl -L $DOWNLOAD_LINK -o terraria-server.zip \
+RUN RELEASE="${TERRARIA_FILE_VERSION}" \
+  && if [[ -z "${RELEASE}" ]]; then \
+    RELEASE=$(curl -fsSL https://terraria.org/api/get/dedicated-servers-names \
+      | grep -oE 'terraria-server-[0-9]+\.zip' \
+      | sed -n '1p' \
+      | tr -dc '0-9'); \
+  fi \
+  && curl -fL "https://terraria.org/api/download/pc-dedicated-server/terraria-server-${RELEASE}.zip" \
+    -o terraria-server.zip \
   && unzip terraria-server.zip -d /tmp-downloads \
   && rm terraria-server.zip
 

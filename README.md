@@ -8,7 +8,7 @@ A Docker-based Terraria server setup that lets you quickly deploy and manage a T
 
 The server:
 
-- Runs Terraria version 1.4.4.9 (PC/Vanilla)
+- Runs the latest official Terraria dedicated server release (PC/Vanilla)
 - Supports customizable world generation
 - Allows adjustable difficulty settings
 - Includes password protection options
@@ -135,8 +135,8 @@ To build and run the server from source, follow these steps:
 
 Currently available profiles:
 
-- **vanilla**: The official Terraria server (PC) - [version](./server/vanilla/terraria-version) | [documentation](./server/vanilla/README.md)
-- **mobile**: Terraria Mobile Edition server - [version](./server/mobile/terraria-version) | [documentation](./server/mobile/README.md)
+- **vanilla**: The official Terraria server (PC) - [documentation](./server/vanilla/README.md)
+- **mobile**: Terraria Mobile Edition server - [documentation](./server/mobile/README.md)
 - **tshock**: TShock server with advanced moderation tools and plugin support
 
 ### TShock Server
@@ -311,15 +311,35 @@ The DevContainer includes all necessary development tools:
     │   │   └── config-template.cfg
     │   ├── Dockerfile
     │   ├── README.md
-    │   ├── scripts
-    │   │   ├── entrypoint.sh
-    │   │   ├── generate-server-config.sh
-    │   │   ├── load-env.sh
-    │   │   └── start-server.sh
-    │   └── terraria-version
+    │   └── scripts
+    │       ├── entrypoint.sh
+    │       ├── generate-server-config.sh
+    │       ├── load-env.sh
+    │       └── start-server.sh
 ```
 
 Where `<server-type>` is either `vanilla` or `mobile`.
+
+### Image Publishing
+
+Server images are built and pushed to GHCR automatically by the
+[Build Terraria Docker Images](./.github/workflows/build-images.yml) workflow:
+
+- **New Terraria releases**: a daily scheduled run checks terraria.org for new
+  official dedicated server releases. When one is found, the image is built,
+  smoke-tested (the container must start and bind the game port), and pushed.
+- **Server code changes**: after merging changes under `server/<type>/`,
+  dispatch the workflow manually from the Actions tab, selecting which image
+  to rebuild. This republishes the image for the current Terraria release.
+- **Specific releases**: the manual dispatch also accepts a release number
+  (e.g. `1450`) to build that exact version. Building a release older than
+  the current one does not move the `latest` tag.
+
+Images are tagged with the Terraria version they run (e.g. `1.4.5.6`), plus a
+moving `latest` tag. Each published image is also recorded as a git tag
+(`<type>-v<terraria-version>`). If you run a server from these images, pin a
+specific version instead of `latest` to control when your world upgrades to a
+new Terraria version.
 
 ### Contributing
 

@@ -4,59 +4,133 @@ env:
   BUILD_CONTEXTS_PATH: server
 
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    # Daily check for new official Terraria releases
+    - cron: 17 6 * * *
+  workflow_dispatch:
+    inputs:
+      server-type:
+        description: Server image to rebuild
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - vanilla
+          - mobile
+      release:
+        description: Specific Terraria release number to build (e.g. 1450). Leave empty for the latest.
+        required: false
+        type: string
+        default: ""
 
 jobs:
-  check-commit-message:
+  detect-image-types:
+    if: ${{ github.event_name != 'workflow_dispatch' || github.ref_name == 'main' }}
     runs-on: ubuntu-latest
+    permissions:
+      packages: read
     outputs:
-      should-build: ${{ steps.check-commit.outputs.should-build }}
+      build-matrix: ${{ steps.compose-matrix.outputs.build-matrix }}
+      has-builds: ${{ steps.compose-matrix.outputs.has-builds }}
     steps:
-      - name: Check commit message
-        id: check-commit
+      - name: Install skopeo manually
+        if: ${{ github.event_name == 'schedule' }}
         shell: bash
         run: |
-          COMMIT_MSG="${{ github.event.head_commit.message }}"
-          if [[ "$COMMIT_MSG" =~ ^build(\(.*\))?:[[:space:]]+ ]]; then
-            echo "should-build=true" >> $GITHUB_OUTPUT
-            echo "Build trigger found in commit message"
+          sudo apt-get update && sudo apt-get install -y skopeo
+
+      - name: Compose Build Matrix
+        id: compose-matrix
+        shell: bash
+        run: |
+          RELEASES=$(curl -fsSL --max-time 30 https://terraria.org/api/get/dedicated-servers-names)
+
+          # The endpoint returns the latest release filename per platform,
+          # positionally: index 0 = PC (vanilla), index 1 = Mobile. This is
+          # the same mapping terraria.org's own download buttons use.
+          declare -A FILE_VERSIONS CHANNELS
+          for entry in "vanilla:0:pc-dedicated-server" "mobile:1:mobile-dedicated-server"; do
+            IFS=: read -r type index channel <<< "$entry"
+            FILE=$(echo "$RELEASES" | jq -r ".[$index]")
+
+            if [[ ! "$FILE" =~ ^terraria-server-([0-9]+)\.zip$ ]]; then
+              echo "Unexpected release filename for '$type': $FILE"
+              exit 1
+            fi
+
+            FILE_VERSIONS[$type]="${BASH_REMATCH[1]}"
+            CHANNELS[$type]="$channel"
+          done
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.server-type }}" != "all" ]]; then
+            TYPES="${{ inputs.server-type }}"
           else
-            echo "should-build=false" >> $GITHUB_OUTPUT
-            echo "No build trigger in commit message"
+            TYPES="vanilla mobile"
           fi
 
-  detect-image-types:
-    if: ${{ needs.check-commit-message.outputs.should-build == 'true' }}
-    needs:
-      - check-commit-message
-    runs-on: ubuntu-latest
-    outputs:
-      changed-image-types: ${{ steps.detect-images-changes.outputs.changed-image-types }}
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_OVERRIDE=""
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.release }}" ]]; then
+            RELEASE_OVERRIDE="${{ inputs.release }}"
+            if [[ ! "$RELEASE_OVERRIDE" =~ ^[0-9]+$ ]]; then
+              echo "Invalid release number: '$RELEASE_OVERRIDE' (digits only, e.g. 1456)"
+              exit 1
+            fi
+          fi
 
-      - name: List Changed Server Folders
-        id: detect-images-changes
-        uses: ./.github/actions/detect-images-changes
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          server-path: ${{ env.BUILD_CONTEXTS_PATH }}
+          MATRIX="[]"
+          for type in $TYPES; do
+            # On scheduled runs only build releases not yet in the registry
+            if [[ "${{ github.event_name }}" == "schedule" ]]; then
+              EXISTING_TAGS=$(skopeo list-tags "docker://ghcr.io/${{ github.repository }}-$type" \
+                --creds "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}" 2>/dev/null \
+                | jq -r '.Tags[]' || echo "")
+
+              if echo "$EXISTING_TAGS" | tr -d '.' | grep -qx "${FILE_VERSIONS[$type]}"; then
+                echo "'$type' already has an image for release ${FILE_VERSIONS[$type]}"
+                continue
+              fi
+            fi
+
+            # A pinned older release must not move the "latest" tag backwards
+            VERSION="${FILE_VERSIONS[$type]}"
+            PUSH_LATEST=true
+            if [[ -n "$RELEASE_OVERRIDE" ]]; then
+              VERSION="$RELEASE_OVERRIDE"
+              if [[ "$VERSION" != "${FILE_VERSIONS[$type]}" ]]; then
+                PUSH_LATEST=false
+              fi
+            fi
+
+            MATRIX=$(echo "$MATRIX" | jq -c \
+              --arg type "$type" \
+              --arg file_version "$VERSION" \
+              --arg channel "${CHANNELS[$type]}" \
+              --arg push_latest "$PUSH_LATEST" \
+              '. + [{"type": $type, "file-version": $file_version, "channel": $channel, "push-latest": $push_latest}]')
+          done
+
+          echo "Build matrix: $MATRIX"
+          echo "build-matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+
+          if [[ "$MATRIX" == "[]" ]]; then
+            echo "has-builds=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has-builds=true" >> "$GITHUB_OUTPUT"
+          fi
 
   build-images:
     needs:
       - detect-image-types
+    if: ${{ needs.detect-image-types.outputs.has-builds == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     strategy:
+      fail-fast: false
       matrix:
-        type: ${{ fromJSON(needs.detect-image-types.outputs.changed-image-types) }}
+        include: ${{ fromJSON(needs.detect-image-types.outputs.build-matrix) }}
     steps:
       - name: Create meshi-team-bot[bot] token
         uses: actions/create-github-app-token@v1
@@ -78,6 +152,9 @@ jobs:
           server-type: ${{ matrix.type }}
           build-directory: ${{ env.BUILD_CONTEXTS_PATH }}/${{ matrix.type }}
           repository-prefix: ${{ github.repository }}
+          file-version: ${{ matrix.file-version }}
+          download-channel: ${{ matrix.channel }}
+          push-latest: ${{ matrix.push-latest }}
 
       - name: Create Tag
         id: create-tag
