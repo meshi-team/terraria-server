@@ -1,9 +1,10 @@
 name: Build and Push Terraria Server Image
+description: Downloads and verifies a Terraria release, builds the server image, smoke-tests it, and pushes it to GHCR
 
 inputs:
   server-type:
     required: true
-    description: Type of Terraria server (vanilla, tshock, etc)
+    description: Type of Terraria server (vanilla, mobile, etc)
   build-directory:
     required: true
     description: Directory containing Dockerfile and build context
@@ -13,14 +14,17 @@ inputs:
   token:
     required: true
     description: GitHub token for GHCR authentication
+  file-version:
+    required: true
+    description: Terraria release number as it appears in the official download filename (e.g. 1456)
+  download-channel:
+    required: true
+    description: terraria.org download channel (pc-dedicated-server or mobile-dedicated-server)
 
 outputs:
   image-tag:
-    description: Tag for the built image
-    value: ${{ steps.generate-image-tag.outputs.image-tag }}
-  package-name:
-    description: Name of the package
-    value: ${{ steps.generate-image-tag.outputs.package-name }}
+    description: Tag for the built image (the dotted Terraria version)
+    value: ${{ steps.verify-release.outputs.version }}
 
 runs:
   using: composite
@@ -32,55 +36,95 @@ runs:
         username: ${{ github.actor }}
         password: ${{ inputs.token }}
 
-    - name: Install skopeo manually
-      shell: bash
-      run: |
-        sudo apt-get update && sudo apt-get install -y skopeo
-
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Read Terraria Version
-      id: read-version
+    - name: Download and Verify Terraria Release
+      id: verify-release
       shell: bash
       run: |
-        VERSION=$(cat "${{ inputs.build-directory }}/terraria-version")
+        RELEASE_URL="https://terraria.org/api/download/${{ inputs.download-channel }}/terraria-server-${{ inputs.file-version }}.zip"
+        curl -fsSL "$RELEASE_URL" -o /tmp/terraria-release.zip
+
+        # The zip ships the official changelog, whose first line holds the
+        # dotted version ("Version 1.4.5.6 Changes ---..."). Its digits must
+        # match the release number from the download filename.
+        FIRST_LINE=$(unzip -p /tmp/terraria-release.zip "*/Linux/changelog.txt" | sed -n '1p')
+        VERSION=$(grep -oE '[0-9]+(\.[0-9]+)+' <<< "$FIRST_LINE" | sed -n '1p')
+
+        if [[ -z "$VERSION" || "${VERSION//./}" != "${{ inputs.file-version }}" ]]; then
+          echo "Changelog version '$VERSION' does not match release number '${{ inputs.file-version }}'"
+          echo "Changelog first line: $FIRST_LINE"
+          exit 1
+        fi
+
+        echo "Verified Terraria release: $VERSION (${{ inputs.file-version }})"
         echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-    - name: Generate Image Tag
-      id: generate-image-tag
-      shell: bash
-      run: |
-        # Read version sequence from JSON file
-        readarray -t AVAILABLE_TAGS < <(jq -r '.[]' ./.github/image_versions.json)
-
-        VERSION="${{ steps.read-version.outputs.version }}"
-        PKG_NAME="${{ inputs.repository-prefix }}-${{ inputs.server-type }}"
-        echo "package-name=$PKG_NAME" >> $GITHUB_OUTPUT
-
-        EXISTING_TAGS=$(skopeo list-tags docker://ghcr.io/$PKG_NAME \
-          --creds "${{ github.actor }}:${{ inputs.token }}" \
-          | jq -r '.Tags[]' 2>/dev/null || echo "")
-
-        # The sequence restarts for every new Terraria version, so only
-        # tags belonging to the current version count as taken
-        NEXT_TAG="${AVAILABLE_TAGS[0]}"  # Default to first element
-        for tag in "${AVAILABLE_TAGS[@]}"; do
-          if ! echo "$EXISTING_TAGS" | grep -qx "${VERSION}-${tag}"; then
-            NEXT_TAG="$tag"
-            break
-          fi
-        done
-
-        echo "image-tag=${VERSION}-$NEXT_TAG" >> $GITHUB_OUTPUT
 
     - name: Get current timestamp
       id: timestamp
       shell: bash
       run: echo "build_date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
+    - name: Build Image for Smoke Test
+      uses: docker/build-push-action@v5
+      with:
+        context: ${{ inputs.build-directory }}
+        platforms: linux/amd64
+        load: true
+        tags: smoke-test/${{ inputs.server-type }}:candidate
+        cache-from: type=gha,scope=${{ inputs.server-type }}
+        cache-to: type=gha,mode=max,scope=${{ inputs.server-type }}
+        build-args: |
+          TERRARIA_FILE_VERSION=${{ inputs.file-version }}
+          VCS_REF=${{ github.sha }}
+          BUILD_DATE=${{ steps.timestamp.outputs.build_date }}
+          VERSION=${{ steps.verify-release.outputs.version }}
+          DOCS=${{ inputs.build-directory }}/README.md
+
+    - name: Smoke Test Server Startup
+      shell: bash
+      run: |
+        docker run -d -t --name smoke-server \
+          -e WORLD_NAME=smoke-test \
+          -e WORLD_SIZE=1 \
+          smoke-test/${{ inputs.server-type }}:candidate
+
+        # Ready when the server binds the game port inside the container
+        # (TCP for vanilla, UDP for mobile) or logs its startup line. The
+        # first boot generates a world, so give it up to 10 minutes.
+        READY=""
+        for _ in $(seq 1 60); do
+          if [[ "$(docker inspect -f '{{.State.Running}}' smoke-server)" != "true" ]]; then
+            echo "Server container exited before becoming ready"
+            docker logs smoke-server
+            exit 1
+          fi
+          # 1E61 is port 7777 in the hex notation used by /proc/net
+          if docker exec smoke-server grep -qi ':1E61' \
+            /proc/net/tcp /proc/net/tcp6 /proc/net/udp /proc/net/udp6 2>/dev/null; then
+            READY=1
+            break
+          fi
+          if docker logs smoke-server 2>&1 | grep -qiE 'server started|listening on port'; then
+            READY=1
+            break
+          fi
+          sleep 10
+        done
+
+        if [[ -z "$READY" ]]; then
+          echo "Server did not become ready in time"
+          docker logs smoke-server
+          exit 1
+        fi
+
+        echo "Server is up. Last log lines:"
+        docker logs smoke-server 2>&1 | tail -n 5
+        docker rm -f smoke-server
 
     - name: Build and Push Image
       uses: docker/build-push-action@v5
@@ -88,11 +132,13 @@ runs:
         context: ${{ inputs.build-directory }}
         platforms: linux/amd64,linux/arm64,linux/arm/v7
         tags: |
-          ghcr.io/${{ steps.generate-image-tag.outputs.package-name }}:${{ steps.generate-image-tag.outputs.image-tag }}
-          ghcr.io/${{ steps.generate-image-tag.outputs.package-name }}:latest
+          ghcr.io/${{ inputs.repository-prefix }}-${{ inputs.server-type }}:${{ steps.verify-release.outputs.version }}
+          ghcr.io/${{ inputs.repository-prefix }}-${{ inputs.server-type }}:latest
         push: true
+        cache-from: type=gha,scope=${{ inputs.server-type }}
         build-args: |
+          TERRARIA_FILE_VERSION=${{ inputs.file-version }}
           VCS_REF=${{ github.sha }}
           BUILD_DATE=${{ steps.timestamp.outputs.build_date }}
-          VERSION=${{ steps.generate-image-tag.outputs.image-tag }}
+          VERSION=${{ steps.verify-release.outputs.version }}
           DOCS=${{ inputs.build-directory }}/README.md
