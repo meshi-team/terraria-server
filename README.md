@@ -8,19 +8,15 @@ A Docker-based Terraria server setup that lets you quickly deploy and manage a T
 
 The server:
 
-- Runs the latest official Terraria dedicated server release (PC/Vanilla)
+- Runs the official Terraria dedicated server, with `vanilla` (PC), `mobile`
+  and `tshock` profiles available
+- Provides images for Terraria 1.4.4.9 and every release from 1.4.5.0
+  onwards — new versions are built and published automatically when Re-Logic
+  releases them
 - Supports customizable world generation
 - Allows adjustable difficulty settings
 - Includes password protection options
 - Preserves world data between container restarts
-
-> **Mobile support is now available!**
-> Run a Terraria Mobile Edition server using the new `mobile` profile.
-> See [server/mobile/README.md](./server/mobile/README.md) for details.
-
-> **TShock support is now available!**
-> Run a TShock-enabled Terraria server using the new `tshock` profile.
-> See the [TShock Wiki](https://github.com/Pryaxis/TShock/wiki) for advanced configuration, plugins, and moderation tools.
 
 ## Table of contents
 
