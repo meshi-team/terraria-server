@@ -32,7 +32,7 @@
 
     // Node.js LTS
     // https://github.com/devcontainers/features/tree/main/src/node
-    "ghcr.io/devcontainers/features/node:1": {
+    "ghcr.io/devcontainers/features/node:2": {
       "version": "lts",
       "nvmVersion": "latest"
     },
