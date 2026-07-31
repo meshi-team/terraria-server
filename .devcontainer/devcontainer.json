@@ -51,7 +51,7 @@
 
     // shfmt
     // https://github.com/devcontainers-contrib/features/tree/main/src/shfmt
-    "ghcr.io/devcontainers-contrib/features/shfmt:1.0.0": {
+    "ghcr.io/devcontainers-contrib/features/shfmt:1.0.2": {
       "version": "latest"
     },
 
